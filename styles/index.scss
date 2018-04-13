@@ -1,0 +1,89 @@
+@import '~bulma';
+@import '~bulma-tagsinput/dist/bulma-tagsinput';
+
+$anim-time: 0.25s;
+
+.navbar {
+    border-bottom: 1px solid $border;
+
+    .navbar-item.is-expanded {
+        padding-right: 0;
+    }
+}
+
+.snippet {
+    .title {
+        height: 1.75rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .edit-button {
+        opacity: 0;
+        transition: opacity $anim-time;
+    }
+
+    &:hover .edit-button {
+        opacity: 1;
+    }
+}
+
+.box.content-container {
+    position: relative;
+    margin-bottom: 0.5rem;
+
+    p {
+        white-space: pre-line;
+    }
+
+    .copy-button {
+        position: absolute;
+        top: 0;
+        left: 0;
+
+        display: flex;
+        align-items: center;
+        flex-direction: vertical;
+        justify-content: center;
+
+        width: 100%;
+        height: 100%;
+
+        cursor: pointer;
+
+        background: $grey-lighter;
+        opacity: 0;
+
+        transition: opacity $anim-time;
+
+        &:hover {
+            opacity: 0.75;
+        }
+
+        &.copy-success {
+            color: $success-invert;
+            background-color: $success;
+        }
+    }
+}
+
+.tags a {
+    margin: 0 0.25rem;
+
+    &:first-child {
+        margin-left: 0;
+    }
+
+    &:last-child {
+        margin-right: 0;
+    }
+}
+
+.modal {
+    .tags-input + .field.is-grouped.is-grouped-multiline {
+        margin-bottom: 0;
+    }
+}
+
+.margin-right-auto {
+    margin-right: auto !important;
+}

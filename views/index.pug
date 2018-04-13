@@ -1,0 +1,67 @@
+include _mixins.pug
+
+html(lang='en').has-navbar-fixed-top
+    head
+        meta(charset='utf-8')
+        meta(http-equiv='x-ua-compatible', content='ie=edge')
+        meta(name='viewport', content='width=device-width, initial-scale=1')
+
+        title Snippet Store
+
+        link(rel='shortcut icon', href='/logo.png', type='image/png')
+
+        link(rel='stylesheet', href='/bundle.css')
+
+    body
+        nav.navbar.is-fixed-top
+            .container
+                .navbar-item.is-expanded
+                    input.input.search-input(type='search', placeholder='Search', autofocus)
+                .navbar-item
+                    a.button.add-new-button Add New
+
+        section.section
+            .container
+                .columns.is-multiline.snippets
+                    each s in snippets
+                        +snippet(s._id, s.title, s.content, s.tags)
+
+        #edit-modal.modal
+            .modal-background
+            .modal-content
+                .box
+                    .field
+                        label.label Title
+                        .control
+                            input.input.title-input(type='text', placeholder='Can\'t be empty.')
+                    .field
+                        label.label Content
+                        .control
+                            textarea.textarea.content-input(type='text', placeholder='Can\'t be empty.')
+                    .field
+                        label.label Tags
+                        .control
+                            input.input.tags-input
+                    .field.is-grouped.is-grouped-right
+                        .control.margin-right-auto
+                            a.button.is-danger.is-outlined.delete-button Delete
+                        .control
+                            a.button.is-primary.save-button Save
+                        .control
+                            a.button.is-light.cancel-button Cancel
+            button.modal-close
+
+        #confirm-delete-modal.modal
+            .modal-background
+            .modal-content
+                .box
+                    .field
+                        label.label Are you sure you want to delete this snippet?
+                    .field.is-grouped.is-grouped-centered
+                        .control
+                            a.button.is-danger.is-outlined.delete-yes-button Yes
+                        .control
+                            a.button.is-primary.delete-no-button No
+            button.modal-close
+
+        script(src="/bundle.js")
