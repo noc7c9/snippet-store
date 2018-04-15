@@ -47,7 +47,8 @@ MongoClient.connect(MONGODB_URI, (err, client) => {
         if (id && snippet.title && snippet.content) {
             snippets.findOneAndReplace({_id: id}, snippet, (err, result) => {
                 if (err) {
-                    res.send('ERR: ' + err);
+                    console.log('ERR:', err);
+                    res.send('ERROR');
                 } else {
                     console.log('UPDATE:', id, snippet);
                     res.send('OK');
@@ -67,7 +68,8 @@ MongoClient.connect(MONGODB_URI, (err, client) => {
         if (snippet.title && snippet.content) {
             snippets.insert(snippet, (err, result) => {
                 if (err) {
-                    res.send('ERR: ' + err);
+                    console.log('ERR:', err);
+                    res.send('ERROR');
                 } else {
                     console.log('CREATE:', snippet);
                     res.send(result.ops[0]._id);
@@ -83,7 +85,8 @@ MongoClient.connect(MONGODB_URI, (err, client) => {
         snippets.findOneAndDelete({_id: id}, (err, result) => {
             console.log(err, result);
             if (err) {
-                res.send('ERR: ' + err);
+                console.log('ERR:', err);
+                res.send('ERROR');
             } else {
                 console.log('DELETE:', id);
                 res.send('OK');

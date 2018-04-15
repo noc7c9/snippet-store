@@ -84,6 +84,14 @@ $anim-time: 0.25s;
     }
 }
 
+.error-msg {
+    position: fixed;
+    top: 1rem;
+    left: 1rem;
+    z-index: 1000;
+    padding: 1rem;
+}
+
 .margin-right-auto {
     margin-right: auto !important;
 }

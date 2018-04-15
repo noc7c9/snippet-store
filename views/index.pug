@@ -8,9 +8,9 @@ html(lang='en').has-navbar-fixed-top
 
         title Snippet Store
 
-        link(rel='shortcut icon', href='/logo.png', type='image/png')
-
         link(rel='stylesheet', href='/bundle.css')
+
+        link(rel='shortcut icon', href='/logo.png', type='image/png')
 
     body
         nav.navbar.is-fixed-top
@@ -55,7 +55,7 @@ html(lang='en').has-navbar-fixed-top
             .modal-background
             .modal-content
                 .box
-                    .field
+                    .field.is-grouped.is-grouped-centered
                         label.label Are you sure you want to delete this snippet?
                     .field.is-grouped.is-grouped-centered
                         .control
@@ -63,5 +63,7 @@ html(lang='en').has-navbar-fixed-top
                         .control
                             a.button.is-primary.delete-no-button No
             button.modal-close
+
+        .error-msg.notification.is-danger(style='display: none;')
 
         script(src="/bundle.js")

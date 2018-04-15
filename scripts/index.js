@@ -33,6 +33,8 @@ const FUSE_OPTIONS = {
 
 const $search = $('.search-input')
 
+const $errorMsg = $('.error-msg');
+
 const $snippetEditModal = $('#edit-modal');
 const $titleInput = $('.title-input');
 const $contentInput = $('.content-input');
@@ -51,6 +53,17 @@ function updateModalValidityStatus() {
     $contentInput.toggleClass('is-danger', isContentEmpty);
 
     $snippetEditModal.find('.save-button').attr('disabled', isDisabled);
+}
+
+function popUpErrorNotification(msg) {
+    msg = msg || 'Error! Please try again.';
+    $errorMsg.text(msg);
+
+    $errorMsg
+        .finish()
+        .show('fast')
+        .delay(3000)
+        .hide('fast')
 }
 
 function showModal(snippet) {
@@ -116,13 +129,23 @@ $confirmDeleteModal
                 id: id,
             },
         })
-            .done(() => {
+            .fail(() => {
+                $yesButton.removeClass('is-loading');
+                popUpErrorNotification('Error: Unable to delete snippet, please try again.');
+            })
+            .done((status) => {
                 $yesButton.removeClass('is-loading');
 
-                $confirmDeleteModal.removeClass('is-active');
-                $snippetEditModal.removeClass('is-active');
+                if (status.toUpperCase().trim() === 'ERROR') {
+                    popUpErrorNotification('Error: Unable to delete snippet, please try again.');
+                } else {
+                    $confirmDeleteModal.removeClass('is-active');
+                    $yesButton.text('Yes');
 
-                $(`#${id}`).remove();
+                    $snippetEditModal.removeClass('is-active');
+
+                    $(`#${id}`).remove();
+                }
             })
     })
 
@@ -159,11 +182,20 @@ $snippetEditModal
                 method: 'POST',
                 data: snippet,
             })
-                .done(() => {
+                .fail(() => {
                     $saveButton.removeClass('is-loading');
-                    $snippetEditModal.removeClass('is-active');
+                    popUpErrorNotification('Error: Unable to edit snippet, please try again.');
+                })
+                .done((status) => {
+                    $saveButton.removeClass('is-loading');
 
-                    updateSnippet(editingSnippet, snippet);
+                    if (status.toUpperCase().trim() === 'ERROR') {
+                        popUpErrorNotification('Error: Unable to edit snippet, please try again.');
+                    } else {
+                        $snippetEditModal.removeClass('is-active');
+
+                        updateSnippet(editingSnippet, snippet);
+                    }
                 })
         } else {
             console.log('creating', snippet);
@@ -172,15 +204,24 @@ $snippetEditModal
                 method: 'POST',
                 data: snippet,
             })
+                .fail(() => {
+                    $saveButton.removeClass('is-loading');
+                    popUpErrorNotification('Error: Unable to create snippet, please try again.');
+                })
                 .done((id) => {
                     $saveButton.removeClass('is-loading');
-                    $snippetEditModal.removeClass('is-active');
 
-                    snippet._id = id;
+                    if (id.toUpperCase().trim() === 'ERROR') {
+                        popUpErrorNotification('Error: Unable to create snippet, please try again.');
+                    } else {
+                        $snippetEditModal.removeClass('is-active');
 
-                    const html = snippetTemplate(snippet);
-                    const $snippet = $.parseHTML(html);
-                    $('.snippets').prepend($snippet);
+                        snippet._id = id;
+
+                        const html = snippetTemplate(snippet);
+                        const $snippet = $.parseHTML(html);
+                        $('.snippets').prepend($snippet);
+                    }
                 })
         }
     })
