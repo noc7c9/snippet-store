@@ -5,6 +5,32 @@ import Fuse from 'fuse.js';
 
 import snippetTemplate from '../views/snippet.pug';
 
+const FUSE_OPTIONS = {
+    tokenize: true,
+    matchAllTokens: true,
+    includeScore: true,
+    threshold: 0.1,
+    location: 0,
+    distance: 100,
+    maxPatternLength: 32,
+    minMatchCharLength: 3,
+    id: 'id',
+    keys: [
+        {
+            name: 'tags',
+            weight: 0.5,
+        },
+        {
+            name: 'title',
+            weight: 0.4,
+        },
+        {
+            name: 'content',
+            weight: 0.1,
+        },
+    ],
+};
+
 const $search = $('.search-input')
 
 const $snippetEditModal = $('#edit-modal');
@@ -220,27 +246,11 @@ $search.on('input', () => {
         }
     }).get();
 
-    const fuse = new Fuse(snippets, {
-        id: 'id',
-        keys: [
-            {
-                name: 'tags',
-                weight: 0.5,
-            },
-            {
-                name: 'title',
-                weight: 0.4,
-            },
-            {
-                name: 'content',
-                weight: 0.1,
-            },
-        ],
-    });
+    const fuse = new Fuse(snippets, FUSE_OPTIONS);
 
     const matches = {};
-    for (let id of fuse.search(query)) {
-        matches[id] = true;
+    for (let { item } of fuse.search(query)) {
+        matches[item] = true;
     }
 
     $allSnippets.each(function () {
