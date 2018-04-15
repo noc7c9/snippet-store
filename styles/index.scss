@@ -1,3 +1,7 @@
+html { /* anti-FOUC */
+    display: block;
+}
+
 @import '~bulma';
 @import '~bulma-tagsinput/dist/bulma-tagsinput';
 
