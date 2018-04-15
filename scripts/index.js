@@ -52,6 +52,9 @@ function showModal(snippet) {
     updateModalValidityStatus();
 
     $snippetEditModal.addClass('is-active');
+
+    // focus title input on show
+    $titleInput.focus();
 }
 
 function updateSnippet(id, data) {
