@@ -1,6 +1,6 @@
-const { assertIsSnippet } = require('../../utils');
+const uuid = require('uuid');
 
-const randomId = () => `${Math.floor(Math.random() * 1e16)}`;
+const { assertIsSnippet } = require('../../utils');
 
 exports.init = async () => {
     const data = {};
@@ -8,7 +8,7 @@ exports.init = async () => {
         list: async () => Object.values(data),
         create: async (snippet) => {
             assertIsSnippet(snippet);
-            const id = randomId();
+            const id = uuid.v4();
             data[id] = { id, ...snippet };
             console.log(`CREATED[${id}]`, data);
             return { id };
