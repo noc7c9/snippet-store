@@ -19,7 +19,12 @@ exports.init = async ({ uri }) => {
     const coll = db.collection('snippets');
 
     return {
-        list: () => promised(coll.find({}), 'toArray'),
+        list: () =>
+            promised(coll.find({}), 'toArray').map((snippet) => {
+                snippet.id = snippet._id;
+                delete snippet._id;
+                return snippet;
+            }),
         create: async (snippet) => {
             assertIsSnippet(snippet);
             const result = await promised(coll, 'insert', snippet);

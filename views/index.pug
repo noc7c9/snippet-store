@@ -27,7 +27,7 @@ html(lang='en').has-navbar-fixed-top
             .container
                 .columns.is-multiline.snippets
                     each s in snippets
-                        +snippet(s._id, s.title, s.content, s.tags)
+                        +snippet(s.id, s.title, s.content, s.tags)
 
         #edit-modal.modal
             .modal-background
