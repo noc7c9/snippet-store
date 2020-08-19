@@ -31,7 +31,7 @@ const FUSE_OPTIONS = {
     ],
 };
 
-const $search = $('.search-input')
+const $search = $('.search-input');
 
 const $errorMsg = $('.error-msg');
 
@@ -59,14 +59,11 @@ function popUpErrorNotification(msg) {
     msg = msg || 'Error! Please try again.';
     $errorMsg.text(msg);
 
-    $errorMsg
-        .finish()
-        .show('fast')
-        .delay(3000)
-        .hide('fast')
+    $errorMsg.finish().show('fast').delay(3000).hide('fast');
 }
 
 function showModal(snippet) {
+    console.log('show', snippet);
     snippet = snippet || {};
     const title = snippet.title || '';
     const content = snippet.content || '';
@@ -116,7 +113,7 @@ $confirmDeleteModal
         $confirmDeleteModal.removeClass('is-active');
     })
     .on('click', '.delete-yes-button', () => {
-        console.log('deleting', {_id: editingSnippet});
+        console.log('deleting', { _id: editingSnippet });
 
         const id = editingSnippet;
 
@@ -131,13 +128,17 @@ $confirmDeleteModal
         })
             .fail(() => {
                 $yesButton.removeClass('is-loading');
-                popUpErrorNotification('Error: Unable to delete snippet, please try again.');
+                popUpErrorNotification(
+                    'Error: Unable to delete snippet, please try again.',
+                );
             })
             .done((status) => {
                 $yesButton.removeClass('is-loading');
 
                 if (status.toUpperCase().trim() === 'ERROR') {
-                    popUpErrorNotification('Error: Unable to delete snippet, please try again.');
+                    popUpErrorNotification(
+                        'Error: Unable to delete snippet, please try again.',
+                    );
                 } else {
                     $confirmDeleteModal.removeClass('is-active');
                     $yesButton.text('Yes');
@@ -146,14 +147,13 @@ $confirmDeleteModal
 
                     $(`#${id}`).remove();
                 }
-            })
-    })
+            });
+    });
 
 // initialize snippet modal
-$('.add-new-button')
-    .on('click', () => {
-        showModal();
-    })
+$('.add-new-button').on('click', () => {
+    showModal();
+});
 $snippetEditModal
     .on('click', '.modal-close, .cancel-button', () => {
         $snippetEditModal.removeClass('is-active');
@@ -168,7 +168,7 @@ $snippetEditModal
             title: $titleInput.get(0).value.trim(),
             content: $contentInput.get(0).value.trim(),
             tags: tagified.tags.filter((v) => v),
-        }
+        };
 
         const $saveButton = $('.save-button');
         $saveButton.addClass('is-loading');
@@ -184,19 +184,23 @@ $snippetEditModal
             })
                 .fail(() => {
                     $saveButton.removeClass('is-loading');
-                    popUpErrorNotification('Error: Unable to edit snippet, please try again.');
+                    popUpErrorNotification(
+                        'Error: Unable to edit snippet, please try again.',
+                    );
                 })
                 .done((status) => {
                     $saveButton.removeClass('is-loading');
 
                     if (status.toUpperCase().trim() === 'ERROR') {
-                        popUpErrorNotification('Error: Unable to edit snippet, please try again.');
+                        popUpErrorNotification(
+                            'Error: Unable to edit snippet, please try again.',
+                        );
                     } else {
                         $snippetEditModal.removeClass('is-active');
 
                         updateSnippet(editingSnippet, snippet);
                     }
-                })
+                });
         } else {
             console.log('creating', snippet);
 
@@ -206,13 +210,17 @@ $snippetEditModal
             })
                 .fail(() => {
                     $saveButton.removeClass('is-loading');
-                    popUpErrorNotification('Error: Unable to create snippet, please try again.');
+                    popUpErrorNotification(
+                        'Error: Unable to create snippet, please try again.',
+                    );
                 })
                 .done((id) => {
                     $saveButton.removeClass('is-loading');
 
                     if (id.toUpperCase().trim() === 'ERROR') {
-                        popUpErrorNotification('Error: Unable to create snippet, please try again.');
+                        popUpErrorNotification(
+                            'Error: Unable to create snippet, please try again.',
+                        );
                     } else {
                         $snippetEditModal.removeClass('is-active');
 
@@ -222,7 +230,7 @@ $snippetEditModal
                         const $snippet = $.parseHTML(html);
                         $('.snippets').prepend($snippet);
                     }
-                })
+                });
         }
     })
     .on('click', '.delete-button', () => {
@@ -230,27 +238,23 @@ $snippetEditModal
     })
     .on('input', '.title-input, .content-input', () => {
         updateModalValidityStatus();
-    })
-
+    });
 
 // setup click handlers
 $('.snippets')
     .on('click', '.copy-button', function (evt) {
         const content = $(this).siblings('p').text();
-        clipboard.writeText(content)
+        clipboard
+            .writeText(content)
             .then(() => {
-                $(this)
-                    .addClass('copy-success')
-                    .text('Copied!');
+                $(this).addClass('copy-success').text('Copied!');
             })
             .catch(() => {
                 $(this).text('ERROR: Failed to Copy.');
-            })
+            });
     })
     .on('mouseover', '.copy-button', function (evt) {
-        $(this)
-            .removeClass('copy-success')
-            .text('Click to Copy');
+        $(this).removeClass('copy-success').text('Click to Copy');
     })
     .on('click', '.edit-button', function (evt) {
         const $snippet = $(this).parents('.snippet');
@@ -258,15 +262,19 @@ $('.snippets')
             id: $snippet.attr('id'),
             title: $snippet.find('.title').text(),
             content: $snippet.find('.content').text(),
-            tags: $snippet.find('.tags').text().split('#').filter((v) => v),
-        }
+            tags: $snippet
+                .find('.tags')
+                .text()
+                .split('#')
+                .filter((v) => v),
+        };
         showModal(snippet);
     })
     .on('click', '.tags > a', function (evt) {
         const tag = $(this).text().replace('#', '');
         $search.attr('value', tag);
         $search.trigger('input');
-    })
+    });
 
 $search.on('input', () => {
     const $allSnippets = $('.snippets > .snippet');
@@ -277,15 +285,21 @@ $search.on('input', () => {
         return;
     }
 
-    const snippets = $allSnippets.map(function () {
-        const $snippet = $(this);
-        return {
-            id: $snippet.attr('id'),
-            title: $snippet.find('.title').text(),
-            content: $snippet.find('.content').text(),
-            tags: $snippet.find('.tags').text().split('#').filter((v) => v),
-        }
-    }).get();
+    const snippets = $allSnippets
+        .map(function () {
+            const $snippet = $(this);
+            return {
+                id: $snippet.attr('id'),
+                title: $snippet.find('.title').text(),
+                content: $snippet.find('.content').text(),
+                tags: $snippet
+                    .find('.tags')
+                    .text()
+                    .split('#')
+                    .filter((v) => v),
+            };
+        })
+        .get();
 
     const fuse = new Fuse(snippets, FUSE_OPTIONS);
 
@@ -301,4 +315,4 @@ $search.on('input', () => {
             $(this).hide();
         }
     });
-})
+});
