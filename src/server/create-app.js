@@ -1,9 +1,12 @@
+const assert = require('assert');
 const express = require('express');
 const bodyParser = require('body-parser');
 
 const config = require('./config');
+
 const storageInMemory = require('./storage/in-memory');
-const storageMongo = require('./storage/mongodb');
+const storageMongoDb = require('./storage/mongodb');
+const storageDynamoDb = require('./storage/dynamodb');
 
 module.exports = async () => {
     const app = express();
@@ -13,8 +16,20 @@ module.exports = async () => {
     app.use(express.static('public'));
     app.use(bodyParser.urlencoded({ extended: true }));
 
-    // const storage = await storageMongo.init({ uri: config.MONGODB_URI });
-    const storage = await storageInMemory.init();
+    let storage;
+    if (config.STORAGE === 'in-memory') {
+        storage = await storageInMemory.init();
+    } else if (config.STORAGE === 'mongodb') {
+        assert(config.MONGODB_URI, 'MONGODB_URI env var is not set');
+        storage = await storageMongo.init({ uri: config.MONGODB_URI });
+    } else if (config.STORAGE === 'dynamodb') {
+        assert(config.DYNAMODB_TABLE, 'DYNAMODB_TABLE env var is not set');
+        storage = await storageDynamoDb.init({
+            tableName: config.DYNAMODB_TABLE,
+        });
+    } else {
+        throw new Error(`Unknown env.STORAGE value: ${config.STORAGE}`);
+    }
 
     app.get('/', async (req, res) => {
         // TODO: render an error page if the database fails
