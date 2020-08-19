@@ -1,7 +1,16 @@
-node_modules
-
-public
-.mongodb
+public/
 .env
 
+# MongoDB
+.mongodb/
+
+# Node.JS
+node_modules/
 npm-debug.log.*
+
+# Terraform
+**/.terraform/*
+*.tfstate
+*.tfstate.*
+crash.log
+*.tfvars
