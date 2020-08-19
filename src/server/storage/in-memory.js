@@ -9,13 +9,13 @@ exports.init = async () => {
         create: async (snippet) => {
             assertIsSnippet(snippet);
             const id = randomId();
-            data[id] = snippet;
+            data[id] = { id, ...snippet };
             console.log(`CREATED[${id}]`, data);
             return { id };
         },
         update: async (id, snippet) => {
             assertIsSnippet(snippet);
-            data[id] = snippet;
+            data[id] = { id, ...snippet };
             console.log(`UPDATED[${id}]`, data);
         },
         delete: async (id) => {
