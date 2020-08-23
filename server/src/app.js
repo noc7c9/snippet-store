@@ -16,7 +16,11 @@ const app = express();
 
 app.use(morgan(config.NODE_ENV === 'development' ? 'dev' : 'combined'));
 app.use(bodyParser.json());
-app.use(cors());
+
+// Necessary during development because ports are different
+if (config.NODE_ENV === 'development') {
+    app.use(cors());
+}
 
 let storage;
 if (config.STORAGE === 'in-memory') {
@@ -110,6 +114,7 @@ app.delete('/api/snippets/:id', async (req, res) => {
 });
 
 app.use((req, res) => {
+    console.log({ error: 'Not found', url: req.originalUrl });
     res.status(404);
     res.json({ error: 'Not found' });
 });
