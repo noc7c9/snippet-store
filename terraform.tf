@@ -19,6 +19,14 @@ variable "environment" {
   default = "dev"
 }
 
+variable "domain_name" {
+  type = string
+}
+
+variable "existing_route53_hosted_zone_name" {
+  type = string
+}
+
 ################################################################################
 # Providers, Locals, Data
 #
@@ -36,6 +44,13 @@ locals {
 provider "aws" {
   profile = "default"
   region  = var.region
+}
+
+provider "aws" {
+  # Only ACM certificates issued in us-east-1 can be used with CloudFront
+  alias   = "acm"
+  profile = "default"
+  region  = "us-east-1"
 }
 
 data "aws_caller_identity" "current" {}
@@ -269,6 +284,8 @@ resource "aws_cloudfront_distribution" "cloudfront" {
   comment = "${local.name_prefix}-distribution"
   enabled = true
 
+  aliases = [var.domain_name]
+
   origin {
     origin_id   = "s3"
     domain_name = aws_s3_bucket.website.website_endpoint
@@ -334,7 +351,8 @@ resource "aws_cloudfront_distribution" "cloudfront" {
   }
 
   viewer_certificate {
-    cloudfront_default_certificate = true
+    acm_certificate_arn = aws_acm_certificate.cert.arn
+    ssl_support_method  = "sni-only"
   }
 
   restrictions {
@@ -345,9 +363,56 @@ resource "aws_cloudfront_distribution" "cloudfront" {
 }
 
 ################################################################################
+# Route53 & ACM
+#
+
+data "aws_route53_zone" "zone" {
+  name = var.existing_route53_hosted_zone_name
+}
+
+resource "aws_route53_record" "a" {
+  zone_id = data.aws_route53_zone.zone.zone_id
+  name    = "${var.domain_name}."
+  type    = "A"
+
+  alias {
+    name                   = aws_cloudfront_distribution.cloudfront.domain_name
+    zone_id                = aws_cloudfront_distribution.cloudfront.hosted_zone_id
+    evaluate_target_health = false
+  }
+}
+
+resource "aws_acm_certificate" "cert" {
+  provider          = aws.acm
+  domain_name       = var.domain_name
+  validation_method = "DNS"
+
+  tags = merge(local.common_tags, { Name = "${local.name_prefix}-cert" })
+}
+
+resource "aws_route53_record" "cert" {
+  for_each = {
+    for dvo in aws_acm_certificate.cert.domain_validation_options : dvo.domain_name => dvo
+  }
+
+  zone_id         = data.aws_route53_zone.zone.zone_id
+  name            = each.value.resource_record_name
+  type            = each.value.resource_record_type
+  records         = [each.value.resource_record_value]
+  ttl             = 60
+  allow_overwrite = true
+}
+
+resource "aws_acm_certificate_validation" "cert" {
+  provider                = aws.acm
+  certificate_arn         = aws_acm_certificate.cert.arn
+  validation_record_fqdns = [for record in aws_route53_record.cert : record.fqdn]
+}
+
+################################################################################
 # Outputs
 #
 
 output "url" {
-  value = "https://${aws_cloudfront_distribution.cloudfront.domain_name}"
+  value = "https://${var.domain_name}"
 }
