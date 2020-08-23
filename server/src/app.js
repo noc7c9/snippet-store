@@ -18,10 +18,6 @@ app.use(morgan(config.NODE_ENV === 'development' ? 'dev' : 'combined'));
 app.use(bodyParser.json());
 app.use(cors());
 
-const api = express.Router();
-
-app.use(`${config.ROUTE_PREFIX}/api`, api);
-
 let storage;
 if (config.STORAGE === 'in-memory') {
     console.log('Using In-Memory storage');
@@ -36,7 +32,7 @@ if (config.STORAGE === 'in-memory') {
     throw new Error(`Unknown env.STORAGE value: ${config.STORAGE}`);
 }
 
-api.get('/snippets', async (req, res) => {
+app.get('/api/snippets', async (req, res) => {
     try {
         console.log('Listing snippets');
         const snippets = await storage.list();
@@ -47,7 +43,7 @@ api.get('/snippets', async (req, res) => {
     }
 });
 
-api.post('/snippets', async (req, res) => {
+app.post('/api/snippets', async (req, res) => {
     try {
         console.log('Validating snippet', req.body);
         assertIsSnippet(req.body);
@@ -73,7 +69,7 @@ api.post('/snippets', async (req, res) => {
     }
 });
 
-api.put('/snippets/:id', async (req, res) => {
+app.put('/api/snippets/:id', async (req, res) => {
     const { id } = req.params;
 
     try {
@@ -100,7 +96,7 @@ api.put('/snippets/:id', async (req, res) => {
     }
 });
 
-api.delete('/snippets/:id', async (req, res) => {
+app.delete('/api/snippets/:id', async (req, res) => {
     const { id } = req.params;
 
     try {
