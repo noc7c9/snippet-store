@@ -1,0 +1,26 @@
+{
+    "name": "snippet-store-server",
+    "version": "0.2.0",
+    "repository": "https://github.com/noc7c9/snippet-store",
+    "author": "Athir Saleem <noc7c9@gmail.com>",
+    "license": "MIT",
+    "private": true,
+    "engines": {
+        "node": "12.18.x"
+    },
+    "scripts": {
+        "build": "rm -f build.zip && zip -9r build.zip node_modules/ src/",
+        "start": "NODE_ENV=development watchexec --restart --watch src/ node src/local.js"
+    },
+    "dependencies": {
+        "@aws-sdk/client-dynamodb": "^1.0.0-gamma.6",
+        "aws-serverless-express": "^3.3.8",
+        "dotenv-safe": "^8.2.0",
+        "express": "^4.17.1",
+        "morgan": "^1.10.0",
+        "uuid": "^8.3.0"
+    },
+    "devDependencies": {
+        "cors": "^2.8.5"
+    }
+}

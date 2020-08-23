@@ -3,7 +3,13 @@ import clipboard from 'clipboard-polyfill';
 import Tagify from 'bulma-tagsinput/dist/bulma-tagsinput';
 import Fuse from 'fuse.js';
 
-import snippetTemplate from '../views/snippet.pug';
+import * as config from './config';
+import * as api from './api';
+import snippetTemplate from './views/snippet.pug';
+
+import './index.scss';
+
+console.log('Loaded Config:', config);
 
 const FUSE_OPTIONS = {
     tokenize: true,
@@ -16,18 +22,9 @@ const FUSE_OPTIONS = {
     minMatchCharLength: 3,
     id: 'id',
     keys: [
-        {
-            name: 'tags',
-            weight: 0.5,
-        },
-        {
-            name: 'title',
-            weight: 0.4,
-        },
-        {
-            name: 'content',
-            weight: 0.1,
-        },
+        { name: 'tags', weight: 0.5 },
+        { name: 'title', weight: 0.4 },
+        { name: 'content', weight: 0.1 },
     ],
 };
 
@@ -63,7 +60,7 @@ function popUpErrorNotification(msg) {
 }
 
 function showModal(snippet) {
-    console.log('show', snippet);
+    console.log('Show', snippet);
     snippet = snippet || {};
     const title = snippet.title || '';
     const content = snippet.content || '';
@@ -113,40 +110,40 @@ $confirmDeleteModal
         $confirmDeleteModal.removeClass('is-active');
     })
     .on('click', '.delete-yes-button', () => {
-        console.log('deleting', { _id: editingSnippet });
+        console.log('Deleting', { id: editingSnippet });
 
         const id = editingSnippet;
 
         const $yesButton = $('.delete-yes-button');
         $yesButton.addClass('is-loading');
 
-        $.ajax('/api/delete', {
-            method: 'POST',
-            data: {
-                id: id,
-            },
-        })
-            .fail(() => {
+        api.remove(id)
+            .then(({ error }) => {
+                $yesButton.removeClass('is-loading');
+
+                if (error != null) {
+                    console.error(error);
+                    popUpErrorNotification(
+                        'Error: Unable to delete snippet, please try again.',
+                    );
+                    return;
+                }
+
+                console.log('Deleted', id);
+
+                $confirmDeleteModal.removeClass('is-active');
+                $yesButton.text('Yes');
+
+                $snippetEditModal.removeClass('is-active');
+
+                $(`#${id}`).remove();
+            })
+            .catch((error) => {
+                console.error(error);
                 $yesButton.removeClass('is-loading');
                 popUpErrorNotification(
                     'Error: Unable to delete snippet, please try again.',
                 );
-            })
-            .done((status) => {
-                $yesButton.removeClass('is-loading');
-
-                if (status.toUpperCase().trim() === 'ERROR') {
-                    popUpErrorNotification(
-                        'Error: Unable to delete snippet, please try again.',
-                    );
-                } else {
-                    $confirmDeleteModal.removeClass('is-active');
-                    $yesButton.text('Yes');
-
-                    $snippetEditModal.removeClass('is-active');
-
-                    $(`#${id}`).remove();
-                }
             });
     });
 
@@ -174,62 +171,64 @@ $snippetEditModal
         $saveButton.addClass('is-loading');
 
         if (editingSnippet) {
-            console.log('updating', editingSnippet, snippet);
+            console.log('Updating', editingSnippet, snippet);
 
-            snippet.id = editingSnippet;
+            const id = editingSnippet;
+            snippet.id = id;
 
-            $.ajax('/api/update', {
-                method: 'POST',
-                data: snippet,
-            })
-                .fail(() => {
+            api.update(snippet.id, snippet)
+                .then(({ error }) => {
+                    $saveButton.removeClass('is-loading');
+
+                    if (error != null) {
+                        console.error(error);
+                        popUpErrorNotification(
+                            'Error: Unable to edit snippet, please try again.',
+                        );
+                        return;
+                    }
+
+                    console.log('Updated', id);
+
+                    $snippetEditModal.removeClass('is-active');
+                    updateSnippet(editingSnippet, snippet);
+                })
+                .catch((error) => {
+                    console.error(error);
                     $saveButton.removeClass('is-loading');
                     popUpErrorNotification(
                         'Error: Unable to edit snippet, please try again.',
                     );
-                })
-                .done((status) => {
-                    $saveButton.removeClass('is-loading');
-
-                    if (status.toUpperCase().trim() === 'ERROR') {
-                        popUpErrorNotification(
-                            'Error: Unable to edit snippet, please try again.',
-                        );
-                    } else {
-                        $snippetEditModal.removeClass('is-active');
-
-                        updateSnippet(editingSnippet, snippet);
-                    }
                 });
         } else {
-            console.log('creating', snippet);
+            console.log('Creating', snippet);
 
-            $.ajax('/api/create', {
-                method: 'POST',
-                data: snippet,
-            })
-                .fail(() => {
+            api.create(snippet)
+                .then(({ id, error }) => {
+                    $saveButton.removeClass('is-loading');
+
+                    if (error != null) {
+                        console.error(error);
+                        popUpErrorNotification(
+                            'Error: Unable to create snippet, please try again.',
+                        );
+                        return;
+                    }
+
+                    console.log('Created', id);
+
+                    $snippetEditModal.removeClass('is-active');
+                    snippet.id = id;
+                    const html = snippetTemplate(snippet);
+                    const $snippet = $.parseHTML(html);
+                    $('.snippets').prepend($snippet);
+                })
+                .catch((error) => {
+                    console.error(error);
                     $saveButton.removeClass('is-loading');
                     popUpErrorNotification(
                         'Error: Unable to create snippet, please try again.',
                     );
-                })
-                .done((id) => {
-                    $saveButton.removeClass('is-loading');
-
-                    if (id.toUpperCase().trim() === 'ERROR') {
-                        popUpErrorNotification(
-                            'Error: Unable to create snippet, please try again.',
-                        );
-                    } else {
-                        $snippetEditModal.removeClass('is-active');
-
-                        snippet._id = id;
-
-                        const html = snippetTemplate(snippet);
-                        const $snippet = $.parseHTML(html);
-                        $('.snippets').prepend($snippet);
-                    }
                 });
         }
     })
@@ -314,5 +313,16 @@ $search.on('input', () => {
         } else {
             $(this).hide();
         }
+    });
+});
+
+// load existing snippets
+console.log('Loading snippets');
+api.list().then(async ({ snippets }) => {
+    console.log('Loaded snippets', snippets);
+    snippets.forEach((snippet) => {
+        const html = snippetTemplate(snippet);
+        const $snippet = $.parseHTML(html);
+        $('.snippets').append($snippet);
     });
 });

@@ -1,8 +1,8 @@
 const uuid = require('uuid');
 
-const { assertIsSnippet } = require('../../utils');
+const { assertIsSnippet } = require('../utils');
 
-exports.init = async () => {
+exports.init = () => {
     const data = {};
     return {
         list: async () => Object.values(data),

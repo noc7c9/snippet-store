@@ -1,12 +1,12 @@
-public/
+*.zip
 .env
-
-# MongoDB
-.mongodb/
+build/
 
 # Node.JS
 node_modules/
+*/node_modules/
 npm-debug.log.*
+*/npm-debug.log.*
 
 # Terraform
 **/.terraform/*

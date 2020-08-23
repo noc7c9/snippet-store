@@ -1,25 +1,17 @@
 const { DynamoDB } = require('@aws-sdk/client-dynamodb');
 const uuid = require('uuid');
 
-const { assertIsSnippet } = require('../../utils');
+const { assertIsSnippet } = require('../utils');
 
-// TODO: update to a version of mongodb that supports promises
-const promised = (context, method, ...args) =>
-    new Promise((resolve, reject) => {
-        const fn = context[method].bind(context);
-        fn(...args, (error, value) => (error ? reject(error) : resolve(value)));
-    });
-
-const connect = (uri) => promised(MongoClient, 'connect', uri);
-exports.init = async ({ tableName: TableName }) => {
-    const dynamodb = new DynamoDB({
+exports.init = ({ tableName: TableName }) => {
+    const client = new DynamoDB({
         region: 'ap-southeast-2',
         apiVersion: '2012-08-10',
     });
 
     return {
         list: async () => {
-            const { Items } = await dynamodb.query({
+            const { Items } = await client.query({
                 TableName,
                 ExpressionAttributeValues: {
                     ':pk': { S: 'snippet' },
@@ -37,7 +29,7 @@ exports.init = async ({ tableName: TableName }) => {
             assertIsSnippet(snippet);
             const id = uuid.v4();
 
-            await dynamodb.putItem({
+            await client.putItem({
                 TableName,
                 Item: {
                     pk: { S: 'snippet' },
@@ -51,7 +43,7 @@ exports.init = async ({ tableName: TableName }) => {
         },
         update: async (id, snippet) => {
             assertIsSnippet(snippet);
-            await dynamodb.updateItem({
+            await client.updateItem({
                 TableName,
                 Key: {
                     pk: { S: 'snippet' },
@@ -67,7 +59,7 @@ exports.init = async ({ tableName: TableName }) => {
             });
         },
         delete: async (id) => {
-            await dynamodb.deleteItem({
+            await client.deleteItem({
                 TableName,
                 Key: {
                     pk: { S: 'snippet' },
