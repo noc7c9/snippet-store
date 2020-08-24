@@ -28,11 +28,13 @@ resource "aws_s3_bucket_object" "website" {
 
   source = "${local.client_build}${each.value}"
 
-  bucket       = aws_s3_bucket.website.bucket
-  acl          = "public-read"
-  key          = replace(each.value, local.client_build, "")
-  etag         = filemd5("${local.client_build}${each.value}")
-  content_type = lookup(local.mime_types, split(".", each.value)[length(split(".", each.value)) - 1])
+  bucket = aws_s3_bucket.website.bucket
+  acl    = "public-read"
+  key    = replace(each.value, local.client_build, "")
+  etag   = filemd5("${local.client_build}${each.value}")
+
+  # note: this will error, if the file type is not recognized
+  content_type = local.mime_types[regex("\\.([0-9a-zA-Z]+)$", each.value)[0]]
 }
 
 locals {
