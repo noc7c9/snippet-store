@@ -42,17 +42,9 @@ module.exports = (env, argv) => ({
             allowEmptyValues: true,
         }),
         new Clean(),
-        new Html({
-            template: './src/views/index.pug',
-        }),
-        new Html({
-            template: './src/views/error.pug',
-            filename: 'error.html',
-            inject: false,
-        }),
-        new MiniCssExtract({
-            filename: '[name].css',
-        }),
+        new Html({ template: './src/views/index.pug' }),
+        new Html({ template: './src/views/error.pug', filename: 'error.html' }),
+        new MiniCssExtract({ filename: '[name].css' }),
     ],
     devServer: {
         host: '0.0.0.0',
