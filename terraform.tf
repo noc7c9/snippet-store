@@ -1,3 +1,9 @@
+#
+# Deploys the service to either
+#   - if env == prod to "snippet-store.${domain_name}"
+#   - otherwise to "snippet-store-${env}.${domain_name}"
+#
+
 variable "region" { type = string }
 variable "env" { type = string }
 variable "domain_name" { type = string }

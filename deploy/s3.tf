@@ -1,3 +1,20 @@
+#
+# S3 website bucket
+#
+# And also sync all the files in the client/build folder
+#
+
+locals {
+  build_dir = "${path.module}/../client/build/"
+
+  # lookup table from file extension to mime type
+  mime_types = {
+    html = "text/html"
+    css  = "text/css"
+    js   = "application/javascript"
+  }
+}
+
 resource "aws_s3_bucket" "website" {
   bucket = "${var.name}-website"
   tags   = var.tags
@@ -22,26 +39,19 @@ resource "aws_s3_bucket" "website" {
 EOF
 }
 
+# Upload all build files
+#
 # source: https://acode.ninja/recursive-s3-upload-in-terraform
 resource "aws_s3_bucket_object" "website" {
-  for_each = fileset(local.client_build, "**/*.*")
+  for_each = fileset(local.build_dir, "**/*.*")
 
-  source = "${local.client_build}${each.value}"
+  source = "${local.build_dir}${each.value}"
 
   bucket = aws_s3_bucket.website.bucket
   acl    = "public-read"
-  key    = replace(each.value, local.client_build, "")
-  etag   = filemd5("${local.client_build}${each.value}")
+  key    = replace(each.value, local.build_dir, "")
+  etag   = filemd5("${local.build_dir}${each.value}")
 
   # note: this will error, if the file type is not recognized
   content_type = local.mime_types[regex("\\.([0-9a-zA-Z]+)$", each.value)[0]]
-}
-
-locals {
-  client_build = "${path.module}/../client/build/"
-  mime_types = {
-    html = "text/html"
-    css  = "text/css"
-    js   = "application/javascript"
-  }
 }

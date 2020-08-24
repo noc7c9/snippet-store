@@ -1,3 +1,9 @@
+#
+# The CloudFront distribution in-front of the S3 bucket and the API gateway
+#
+# For simplicity, caching is disabled
+#
+
 resource "aws_cloudfront_distribution" "cloudfront" {
   comment = "${var.name}-distribution"
   tags    = var.tags

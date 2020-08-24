@@ -1,3 +1,7 @@
+#
+# The API gateway, it has only the proxy route to the lambda handler
+#
+
 resource "aws_apigatewayv2_api" "api" {
   name = "${var.name}-api"
   tags = var.tags

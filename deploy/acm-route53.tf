@@ -1,5 +1,14 @@
+#
+# The ACM certificate (plus DNS validation) and the Route53 A record for the
+# website
+#
+# This will also optionally create a Route53 hosted zone if an existing one
+# isn't defined.
+#
+
+# The optional hosted zone
 resource "aws_route53_zone" "zone" {
-  # Only create if an existing zone isn't given
+  # only create if an existing zone isn't given
   count = var.route53_zone_id == "" ? 1 : 0
 
   name = var.domain_name
@@ -10,6 +19,7 @@ locals {
   zone_id = var.route53_zone_id == "" ? aws_route53_zone.zone[0].zone_id : var.route53_zone_id
 }
 
+# The A record
 resource "aws_route53_record" "a" {
   zone_id = local.zone_id
   name    = "${var.domain_name}."
@@ -22,6 +32,7 @@ resource "aws_route53_record" "a" {
   }
 }
 
+# The ACM certificate and DNS validation
 resource "aws_acm_certificate" "cert" {
   provider = aws.acm_us_east_1
 

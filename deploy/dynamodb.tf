@@ -1,3 +1,7 @@
+#
+# The DynamoDB table
+#
+
 resource "aws_dynamodb_table" "db" {
   name = "${var.name}-db"
   tags = var.tags

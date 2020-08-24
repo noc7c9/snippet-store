@@ -1,6 +1,6 @@
-data "aws_caller_identity" "current" {}
-data "aws_partition" "current" {}
-data "aws_region" "current" {}
+#
+# The API lambda handler
+#
 
 resource "aws_lambda_function" "handler" {
   function_name = "${var.name}-handler"
@@ -39,6 +39,7 @@ resource "aws_iam_role" "handler" {
 EOF
 }
 
+# Cloudwatch Logs policy
 resource "aws_iam_policy" "handler_cloudwatch_logs" {
   name = "${var.name}-handler-cloudwatch-logs-policy"
 
@@ -63,11 +64,16 @@ resource "aws_iam_policy" "handler_cloudwatch_logs" {
 EOF
 }
 
+data "aws_caller_identity" "current" {}
+data "aws_partition" "current" {}
+data "aws_region" "current" {}
+
 resource "aws_iam_role_policy_attachment" "handler_cloudwatch_logs" {
   role       = aws_iam_role.handler.name
   policy_arn = aws_iam_policy.handler_cloudwatch_logs.arn
 }
 
+# DynamoDB IAM policy
 resource "aws_iam_policy" "handler_dynamodb" {
   name = "${var.name}-handler-dynamodb-policy"
 
@@ -94,6 +100,7 @@ resource "aws_iam_role_policy_attachment" "handler_dynamodb" {
   policy_arn = aws_iam_policy.handler_dynamodb.arn
 }
 
+# API Gateway invoke permission
 resource "aws_lambda_permission" "api_handler_permission" {
   function_name = aws_lambda_function.handler.function_name
   action        = "lambda:InvokeFunction"
