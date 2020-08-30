@@ -99,10 +99,3 @@ resource "aws_iam_role_policy_attachment" "handler_dynamodb" {
   role       = aws_iam_role.handler.name
   policy_arn = aws_iam_policy.handler_dynamodb.arn
 }
-
-# API Gateway invoke permission
-resource "aws_lambda_permission" "api_handler_permission" {
-  function_name = aws_lambda_function.handler.function_name
-  action        = "lambda:InvokeFunction"
-  principal     = "apigateway.amazonaws.com"
-}
