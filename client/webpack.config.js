@@ -5,13 +5,25 @@ const Html = require('html-webpack-plugin');
 const MiniCssExtract = require('mini-css-extract-plugin');
 
 module.exports = (env, argv) => ({
-    target: 'node',
+    target: 'web',
     mode: argv.mode || 'development',
     entry: {
-        index: './src/index.js',
+        index: './src/index.ts',
+    },
+    resolve: {
+        extensions: ['.js', '.ts'],
     },
     module: {
         rules: [
+            {
+                test: /\.ts$/,
+                use: [
+                    {
+                        loader: '@sucrase/webpack-loader',
+                        options: { transforms: ['typescript', 'imports'] },
+                    },
+                ],
+            },
             {
                 test: /\.pug$/,
                 use: [
@@ -42,8 +54,8 @@ module.exports = (env, argv) => ({
             allowEmptyValues: true,
         }),
         new Clean(),
-        new Html({ template: './src/views/index.pug' }),
-        new Html({ template: './src/views/error.pug', filename: 'error.html' }),
+        new Html({ template: './src/index.pug' }),
+        new Html({ template: './src/error.pug', filename: 'error.html' }),
         new MiniCssExtract({ filename: '[name].css' }),
     ],
     devServer: {
@@ -51,5 +63,14 @@ module.exports = (env, argv) => ({
         allowedHosts: (process.env.WEBPACK_DEV_SERVER_ALLOWED_HOSTS || '')
             .split(',')
             .map((host) => host.trim()),
+        before: (app, server, compiler) => {
+            let hash = null;
+            compiler.hooks.done.tap('__SHITTY_AUTO_RELOAD__', (stats) => {
+                hash = stats.hash;
+            });
+            app.get('/__SHITTY_AUTO_RELOAD__', (req, res) => {
+                res.json({ hash });
+            });
+        },
     },
 });

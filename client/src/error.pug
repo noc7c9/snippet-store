@@ -1,9 +1,5 @@
 html(lang='en')
-    head
-        meta(charset='utf-8')
-        meta(http-equiv='x-ua-compatible', content='ie=edge')
-        meta(name='viewport', content='width=device-width, initial-scale=1.0')
-
+    include templates/include-header.pug
         title Page Not Found | Snippet Store
 
     body
@@ -13,4 +9,4 @@ html(lang='en')
                     h1.title Page Not Found
                     p Sorry, we couldn't find a page with that URL.
                     p
-                        a(href='/') Click here to head back to the home page.
+                        a(href='/#/stores') Head back to the home page.

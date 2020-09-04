@@ -1,0 +1,22 @@
+include ../templates/mixin-modal
+
++modal("Create New Store")
+    #notify-error.notification.is-danger.is-hidden
+
+    .field
+        label.label Title
+        .control
+            input#input-title.input(type='text', placeholder='Required')
+    .field
+        label.label ID
+        .control
+            input#input-id.input(disabled, type='text', placeholder='Generated from Title')
+    .field
+        label.label Description
+        .control
+            textarea#input-desc.textarea(type='text', placeholder='Optional')
+    .field.is-grouped.is-grouped-right
+        .control
+            input#input-submit.button.is-primary(type='submit', value='Create', disabled)
+        .control
+            a.button.is-light.trigger-close Cancel
