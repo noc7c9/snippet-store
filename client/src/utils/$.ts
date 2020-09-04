@@ -1,3 +1,11 @@
+export function byId<E extends HTMLElement>(id: string): E {
+    const elem = document.getElementById(id);
+    if (elem == null) {
+        throw new Error(`Failed to select element with "#${id}"`);
+    }
+    return elem as E;
+}
+
 export function one<E extends HTMLElement>(selector: string): E;
 export function one<E extends HTMLElement>(
     element: HTMLElement,

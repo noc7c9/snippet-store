@@ -12,17 +12,34 @@ import templateSnippetList from './snippet-list.pug';
 import templateModalCreateNewSnippet from './modal-create-new-snippet.pug';
 import templateModalEditSnippet from './modal-edit-snippet.pug';
 
+import makeLoadedSnippets, { LoadedSnippets } from './loaded-snippets';
+
 const log = logger('PAGE::Store-View');
 
 export default (root: HTMLElement, { id: storeId }: { id: string }) => {
     root.innerHTML = template();
 
-    let loadedSnippets: Record<string, types.Snippet> = {};
     const snippets = $.one('#snippets');
+    const loadedSnippets = makeLoadedSnippets();
 
     const renderSnippets = () => {
         snippets.innerHTML = templateSnippetList({
-            snippets: Object.values(loadedSnippets),
+            results: loadedSnippets.asArray(),
+        });
+        refreshSnippets();
+    };
+    const refreshSnippets = () => {
+        const results = loadedSnippets.asArray();
+
+        $.one('#snippets-no-results').classList.toggle(
+            'is-hidden',
+            results.some(({ hidden }) => !hidden),
+        );
+
+        results.forEach(({ snippet, hidden }, index) => {
+            const elem = $.byId(snippet.id);
+            elem.style.order = index.toString();
+            elem.style.display = hidden ? 'none' : '';
         });
     };
 
@@ -51,15 +68,7 @@ export default (root: HTMLElement, { id: storeId }: { id: string }) => {
             return;
         }
 
-        if (res.snippets.length === 0) {
-            $.one('#snippets-no-results').classList.remove('is-hidden');
-            return;
-        }
-
-        res.snippets.forEach((snippet) => {
-            loadedSnippets[snippet.id] = snippet;
-        });
-
+        loadedSnippets.init(res.snippets);
         renderSnippets();
     })();
 
@@ -78,7 +87,8 @@ export default (root: HTMLElement, { id: storeId }: { id: string }) => {
             log('event click: copy', id);
 
             try {
-                await navigator.clipboard.writeText(loadedSnippets[id].content);
+                const snippet = expect.notNull(loadedSnippets.get(id));
+                await navigator.clipboard.writeText(snippet.content);
                 elem.classList.add('copy-success');
             } catch (err) {
                 elem.classList.add('copy-fail');
@@ -97,6 +107,44 @@ export default (root: HTMLElement, { id: storeId }: { id: string }) => {
             elem.classList.remove('copy-success');
             elem.classList.remove('copy-fail');
         });
+    }
+
+    // input events on .search-input and click events on .tags
+    {
+        const DEBOUNCE = 200;
+        const input = $.one<HTMLInputElement>('#search-input');
+
+        let timeout: ReturnType<typeof setTimeout>;
+        $.on(input, 'input', (e) => {
+            clearTimeout(timeout);
+            timeout = setTimeout(doSearch, DEBOUNCE);
+        });
+
+        $.on(snippets, 'click', async (e) => {
+            if (e.target == null) return;
+            const elem = e.target as Element;
+
+            if (!elem.matches('.tags a')) {
+                return;
+            }
+            e.preventDefault();
+
+            const tag = elem.textContent;
+            if (tag == null) {
+                return;
+            }
+
+            if (!input.value.includes(tag)) {
+                input.value = `${input.value} ${tag}`.trim();
+                doSearch();
+            }
+        });
+
+        const doSearch = () => {
+            const query = input.value;
+            loadedSnippets.search(query);
+            refreshSnippets();
+        };
     }
 
     setupCreateNewSnippetModal({
@@ -123,7 +171,7 @@ function setupCreateNewSnippetModal({
     root: HTMLElement;
     storeId: string;
     renderSnippets: () => void;
-    loadedSnippets: Record<string, types.Snippet>;
+    loadedSnippets: LoadedSnippets;
 }) {
     const modal = createModal({ template: templateModalCreateNewSnippet });
     const elems = {
@@ -175,7 +223,7 @@ function setupCreateNewSnippetModal({
 
         log('created new snippet:', res.id);
 
-        loadedSnippets[res.id] = { id: res.id, ...snippet };
+        loadedSnippets.upsert({ id: res.id, ...snippet });
         renderSnippets();
 
         modal.hide();
@@ -193,7 +241,7 @@ function setupEditSnippetModal({
     snippets: HTMLElement;
     storeId: string;
     renderSnippets: () => void;
-    loadedSnippets: Record<string, types.Snippet>;
+    loadedSnippets: LoadedSnippets;
 }) {
     const modal = createModal({ template: templateModalEditSnippet });
     const elems = {
@@ -223,7 +271,7 @@ function setupEditSnippetModal({
 
         log('event click: edit', id);
 
-        const snippet = loadedSnippets[id];
+        const snippet = expect.notNull(loadedSnippets.get(id));
 
         elems.title.value = snippet.title;
         elems.content.value = snippet.content;
@@ -266,7 +314,7 @@ function setupEditSnippetModal({
 
         log('updating snippet:', id);
 
-        loadedSnippets[id] = snippet;
+        loadedSnippets.upsert(snippet);
         renderSnippets();
 
         modal.hide();
