@@ -211,12 +211,12 @@ const mockDataPresets: Record<
         snippetConfig: { title: [1, 7], content: [5, 50], numTags: [0, 10] },
     },
     massive: {
-        numStores: [1000],
+        numStores: [250],
         storeConfig: {
-            numSnippets: [5, 250],
+            numSnippets: [5, 1000],
             title: [3, 5],
             description: [5, 25],
-            numTotalTags: [125],
+            numTotalTags: [250],
         },
         snippetConfig: { title: [1, 7], content: [5, 50], numTags: [0, 25] },
     },

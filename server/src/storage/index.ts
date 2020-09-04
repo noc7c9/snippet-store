@@ -12,7 +12,7 @@ let storage: StorageAPI;
 
 // In-Memory
 if (config.STORAGE === 'in-memory') {
-    const opts = { mock: 'tiny' };
+    const opts = { mock: 'medium' };
     log('Using In-Memory storage:', opts);
     storage = storageInMemory(opts);
 }
