@@ -10,7 +10,7 @@ resource "aws_lambda_function" "handler" {
   source_code_hash = filebase64sha256("${path.module}/../server/build.zip")
 
   handler     = "build/lambda.handler"
-  runtime     = "nodejs10.x"
+  runtime     = "nodejs12.x"
   memory_size = 256
   role        = aws_iam_role.handler.arn
 
