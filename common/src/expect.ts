@@ -1,7 +1,7 @@
 import assert from 'assert';
 
-export const notNull = <T>(value: T | null): T => {
-    assert(value != null, `Value is null`);
+export const notNull = <T>(value: T | null | undefined): T => {
+    assert(value != null, `Value is null or undefined`);
     return value;
 };
 
