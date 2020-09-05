@@ -10,6 +10,25 @@ const url = (path: string, query = {}) => {
     return `${config.API_URL}/api${path}?${queryString}`;
 };
 
+const wrappedFetch = async (url: string, opts: Parameters<typeof fetch>[1]) => {
+    const res = await fetch(url, opts);
+    const { status } = res;
+    const data = await res.json();
+
+    // Just return if the code is okay
+    if (status >= 200 && status < 300) {
+        return data;
+    }
+
+    // Just return if the payload has an error field
+    if ('error' in data) {
+        return data;
+    }
+
+    // Bad code and no error field in payload so add an error field
+    return { ...data, error: status.toString() };
+};
+
 type Res<T> = Promise<T | { error: string }>;
 
 export default {
@@ -22,18 +41,18 @@ export default {
             after?: string;
         }): Res<{ stores: types.Store[] }> => {
             log('GET /stores');
-            return fetch(url('/stores', { first, after }), {
+            return wrappedFetch(url('/stores', { first, after }), {
                 method: 'GET',
-            }).then((res) => res.json());
+            });
         },
 
         create: (data: types.StorePayload): Res<{ id: string }> => {
             log('POST /stores');
-            return fetch(url('/stores'), {
+            return wrappedFetch(url('/stores'), {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data),
-            }).then((res) => res.json());
+            });
         },
 
         fetch: ({
@@ -43,9 +62,9 @@ export default {
         }): Res<{ store: types.Store }> => {
             const path = `/stores/${storeId}`;
             log('GET', path);
-            return fetch(url(path), {
+            return wrappedFetch(url(path), {
                 method: 'GET',
-            }).then((res) => res.json());
+            });
         },
     },
 
@@ -61,9 +80,9 @@ export default {
         }): Res<{ snippets: types.Snippet[] }> => {
             const path = `/stores/${storeId}/snippets`;
             log('GET', path);
-            return fetch(url(path, { first, after }), {
+            return wrappedFetch(url(path, { first, after }), {
                 method: 'GET',
-            }).then((res) => res.json());
+            });
         },
 
         create: (
@@ -72,11 +91,11 @@ export default {
         ): Res<{ id: string }> => {
             const path = `/stores/${storeId}/snippets`;
             log('POST', path);
-            return fetch(url(path), {
+            return wrappedFetch(url(path), {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data),
-            }).then((res) => res.json());
+            });
         },
 
         update: (
@@ -85,11 +104,11 @@ export default {
         ): Res<{ ok: true }> => {
             const path = `/stores/${storeId}/snippets/${id}`;
             log('PUT', path);
-            return fetch(url(path), {
+            return wrappedFetch(url(path), {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data),
-            }).then((res) => res.json());
+            });
         },
 
         remove: ({
@@ -101,9 +120,9 @@ export default {
         }): Res<{ ok: true }> => {
             const path = `/stores/${storeId}/snippets/${id}`;
             log('DELETE', path);
-            return fetch(url(path), {
+            return wrappedFetch(url(path), {
                 method: 'DELETE',
-            }).then((res) => res.json());
+            });
         },
     },
 };
