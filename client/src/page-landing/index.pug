@@ -1,0 +1,25 @@
+include ./mixins
+
+#page-landing
+    section.section
+        .container
+            section#header.hero.is-large
+                .hero-body
+                    .container
+                        h1.title Snippet Store
+                        a.button.is-primary.is-large#create-new-store New Store
+
+            .columns
+                .column
+                    h2.title.is-3 Recent
+                    hr
+                    #recent.columns.is-multiline
+                    #recent-no-results.notification.is-hidden Your recently accessed stores will be listed here
+
+            //     .column
+            //         h2.title.is-3 Public Stores
+            //         hr
+            //         #popular.columns.is-multiline.is-spinner
+            //             .column
+            //                 #popular-no-results.notification.is-hidden Be the first to create a first store!
+            //                 #popular-error.notification.is-danger.is-hidden TOBEOVERRIDDEN

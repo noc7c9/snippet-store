@@ -1,0 +1,23 @@
+include ../templates/mixin-modal
+
++modal("Create New Snippet", "create-new-snippet-modal")
+    #create-notify-error.notification.is-danger.is-hidden
+
+    .field
+        label.label Title
+        .control
+            input#create-input-title.input(type='text', placeholder='Optional')
+    .field
+        label.label Content
+        .control
+            textarea#create-input-content.textarea(type='text', placeholder='Required')
+    .field
+        label.label Tags
+        .control
+            input#create-input-tags.input.tags-input(placeholder="Separate with spaces")
+
+    .field.is-grouped.is-grouped-right
+        .control
+            input#create-input-submit.button.is-primary(type='submit', value='Create')
+        .control
+            a.button.is-light.trigger-close Cancel

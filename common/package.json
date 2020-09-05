@@ -1,0 +1,12 @@
+{
+    "name": "@snippet-store/common",
+    "version": "0.2.0",
+    "repository": "https://github.com/noc7c9/snippet-store",
+    "author": "Athir Saleem <noc7c9@gmail.com>",
+    "license": "MIT",
+    "private": true,
+    "engines": {
+        "node": "12.18.x"
+    },
+    "main": "src/index.ts"
+}

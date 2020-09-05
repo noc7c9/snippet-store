@@ -1,0 +1,8 @@
+mixin modal(title, id)
+    .modal(id=id)
+        .modal-background.trigger-close
+        .modal-content
+            .box
+                h1.title= title
+
+                block
