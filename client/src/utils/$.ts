@@ -51,6 +51,6 @@ export const off = (target: Element, event: string, handler: EventListener) => {
 
 export const frag = <E extends HTMLElement>(html: string): E => {
     const template = document.createElement('template');
-    template.innerHTML = html;
+    template.innerHTML = html.trim();
     return template.content.firstChild as E;
 };
