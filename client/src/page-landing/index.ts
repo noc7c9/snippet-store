@@ -59,6 +59,7 @@ export default (root: HTMLElement) => {
 
         $.on($.one('#create-new-store'), 'click', () => {
             elems.title.value = '';
+            elems.id.value = '';
             elems.desc.value = '';
             elems.submit.classList.remove('is-loading');
             elems.error.classList.add('is-hidden');

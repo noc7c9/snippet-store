@@ -48,6 +48,9 @@ export default (root: HTMLElement, { id: storeId }: { id: string }) => {
         const res = await api.store.fetch({ storeId });
 
         if ('error' in res) {
+            const elem = $.one('#page-error');
+            elem.classList.remove('is-hidden');
+            elem.textContent = `Error: ${res.error}`;
             return;
         }
 

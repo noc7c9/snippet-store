@@ -88,7 +88,7 @@ $anim-time: 0.25s;
     }
 }
 
-#create-new-snippet-modal {
+#create-new-snippet-modal, #edit-snippet-modal {
     .tags-input input:first-child {
         padding-left: $control-padding-horizontal;
     }
