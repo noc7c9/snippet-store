@@ -22,16 +22,18 @@ export default (root: HTMLElement) => {
         const stores = localStorage.getAllRecentStores();
 
         if (stores.length === 0) {
+            log('Found no recent stores');
             $.one('#recent-no-results').classList.remove('is-hidden');
+        } else {
+            log('Found', stores.length, 'recent stores');
+            const recent = $.one('#recent');
+            recent.innerHTML = templateStoreList({
+                stores: stores.map((store) => ({
+                    href: `/#/stores/${store.id}/snippets`,
+                    ...store,
+                })),
+            });
         }
-
-        const recent = $.one('#recent');
-        recent.innerHTML = templateStoreList({
-            stores: stores.map((store) => ({
-                href: `/#/stores/${store.id}/snippets`,
-                ...store,
-            })),
-        });
     }
 
     // (async () => {
@@ -63,6 +65,8 @@ export default (root: HTMLElement) => {
     // })();
 
     {
+        log('Setting up Create-New-Store modal');
+
         const modal = createModal({
             template: templateModalCreateNewStore,
         });
