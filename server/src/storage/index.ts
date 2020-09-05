@@ -1,10 +1,11 @@
+import assert from 'assert';
 import { logger } from '@snippet-store/common';
 
 import * as config from '../config';
 import { StorageAPI } from './types';
 
 import storageInMemory from './in-memory';
-// const storageDynamoDb = require('./dynamodb');
+import storageDynamoDb from './dynamodb';
 
 const log = logger('STORAGE');
 
@@ -17,12 +18,12 @@ if (config.STORAGE === 'in-memory') {
     storage = storageInMemory(opts);
 }
 
-// // DynamoDB
-// else if (config.STORAGE === 'dynamodb') {
-//     assert(config.DYNAMODB_TABLE, 'DYNAMODB_TABLE env var is not set');
-//     console.log(`Using DynamoDB storage (${config.DYNAMODB_TABLE})`);
-//     storage = storageDynamoDb({ tableName: config.DYNAMODB_TABLE });
-// }
+// DynamoDB
+else if (config.STORAGE === 'dynamodb') {
+    assert(config.DYNAMODB_TABLE, 'DYNAMODB_TABLE env var is not set');
+    console.log(`Using DynamoDB storage (${config.DYNAMODB_TABLE})`);
+    storage = storageDynamoDb({ tableName: config.DYNAMODB_TABLE });
+}
 
 // Unknown
 else {

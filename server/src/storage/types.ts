@@ -6,7 +6,7 @@ export type StorageAPI = {
             first?: number;
             after?: string;
         }) => Promise<types.Store[]>;
-        create: (data: types.StorePayload) => Promise<types.Store>;
+        create: (data: types.StorePayload) => Promise<Pick<types.Store, 'id'>>;
         fetch: (args: { id: string }) => Promise<types.Store>;
         update: (
             args: { id: string },
@@ -22,7 +22,7 @@ export type StorageAPI = {
         create: (
             args: { storeId: string },
             data: types.SnippetPayload,
-        ) => Promise<types.Snippet>;
+        ) => Promise<Pick<types.Snippet, 'id'>>;
         update: (
             args: { storeId: string; id: string },
             data: types.SnippetPayload,
