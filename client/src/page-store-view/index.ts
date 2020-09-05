@@ -5,6 +5,7 @@ import * as $ from '../utils/$';
 import * as router from '../utils/router';
 import api from '../utils/api';
 import createModal from '../utils/create-modal';
+import * as localStorage from '../utils/local-storage';
 
 import './index.scss';
 import template from './index.pug';
@@ -53,6 +54,8 @@ export default (root: HTMLElement, { id: storeId }: { id: string }) => {
             elem.textContent = `Error: ${res.error}`;
             return;
         }
+
+        localStorage.addRecentStore(res.store);
 
         const elem = $.one('#title');
         elem.textContent = res.store.title;
