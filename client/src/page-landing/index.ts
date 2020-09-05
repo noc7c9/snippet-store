@@ -15,33 +15,33 @@ const log = logger('PAGE::Landing');
 export default (root: HTMLElement) => {
     root.innerHTML = template();
 
-    (async () => {
-        const popular = $.one('#popular');
-        const res = await api.store.list({ first: 8 });
+    // (async () => {
+    //     const popular = $.one('#popular');
+    //     const res = await api.store.list({ first: 8 });
 
-        popular.classList.remove('is-spinner');
+    //     popular.classList.remove('is-spinner');
 
-        if ('error' in res) {
-            const elem = $.one('#popular-error');
-            elem.classList.remove('is-hidden');
-            elem.textContent = `Error: ${res.error}`;
-            return;
-        }
+    //     if ('error' in res) {
+    //         const elem = $.one('#popular-error');
+    //         elem.classList.remove('is-hidden');
+    //         elem.textContent = `Error: ${res.error}`;
+    //         return;
+    //     }
 
-        const { stores } = res;
+    //     const { stores } = res;
 
-        if (stores.length === 0) {
-            $.one('#popular-no-results').classList.remove('is-hidden');
-            return;
-        }
+    //     if (stores.length === 0) {
+    //         $.one('#popular-no-results').classList.remove('is-hidden');
+    //         return;
+    //     }
 
-        popular.innerHTML = templateStoreList({
-            stores: stores.map((store) => ({
-                href: `/#/stores/${store.id}/snippets`,
-                ...store,
-            })),
-        });
-    })();
+    //     popular.innerHTML = templateStoreList({
+    //         stores: stores.map((store) => ({
+    //             href: `/#/stores/${store.id}/snippets`,
+    //             ...store,
+    //         })),
+    //     });
+    // })();
 
     {
         const modal = createModal({
