@@ -1,16 +1,21 @@
 #page-store-view
 
-    nav.navbar
+    #main-spinner.is-spinner
+
+    section#main-content.section.is-hidden
         .container
-            .navbar-item
-                h1.title#title
+            .columns
+                .column.is-10
+                    h1.title#title
+                    p#description
+                .column.is-narrow.create-new-snippet-button-container
+                    a.button.is-primary.is-large#create-new-snippet New Snippet
 
-            .navbar-item.is-expanded
-                input.input#search-input(type='search', placeholder='Search')
-            .navbar-item
-                a.button#create-new-snippet New Snippet
+            hr
 
-    section.section
+        .container
+            input.input#search-input(type='search', placeholder='Search')
+
         .container
             #page-error.notification.is-danger.is-hidden TOBEOVERRIDDEN
             #snippets-no-results.notification.is-hidden No snippets found

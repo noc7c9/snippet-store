@@ -3,12 +3,14 @@
 $anim-time: 0.25s;
 
 #page-store-view {
-    .navbar {
-        border-bottom: 1px solid $border;
+    .create-new-snippet-button-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
 
-        .navbar-item.is-expanded {
-            padding-right: 0;
-        }
+    #search-input {
+        margin-bottom: 1.6em;
     }
 
     .snippet {

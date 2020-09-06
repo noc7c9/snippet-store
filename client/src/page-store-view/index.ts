@@ -44,9 +44,23 @@ export default (root: HTMLElement, { id: storeId }: { id: string }) => {
         });
     };
 
+    const fetchStoreData = api.store.fetch({ storeId }).then((v) => new Promise(resolve => {
+        setTimeout(() => resolve(v), 2000);
+    }));
+    const fetchSnippets = api.snippets.list({ storeId, first: 250 });
+
+    // Main spinner
+    (async () => {
+        await fetchStoreData;
+        await fetchSnippets;
+
+        $.one('#main-spinner').classList.add('is-hidden');
+        $.one('#main-content').classList.remove('is-hidden');
+    })();
+
     // Loading store data
     (async () => {
-        const res = await api.store.fetch({ storeId });
+        const res = await fetchStoreData;
 
         if ('error' in res) {
             const elem = $.one('#page-error');
@@ -57,13 +71,13 @@ export default (root: HTMLElement, { id: storeId }: { id: string }) => {
 
         localStorage.addRecentStore(res.store);
 
-        const elem = $.one('#title');
-        elem.textContent = res.store.title;
+        $.one('#title').textContent = res.store.title;
+        $.one('#description').textContent = res.store.description;
     })();
 
     // Loading snippets
     (async () => {
-        const res = await api.snippets.list({ storeId, first: 250 });
+        const res = await fetchSnippets;
 
         snippets.classList.remove('is-spinner');
 
