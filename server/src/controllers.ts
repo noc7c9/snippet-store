@@ -97,6 +97,17 @@ export const updateSnippet = async (
     res.json({ ok: true });
 };
 
+export const incrementSnippetCopyCount = async (
+    req: express.Request,
+    res: express.Response,
+) => {
+    const { storeId, id } = req.params;
+    console.log('Incrementing snippet copyCount', storeId, id);
+
+    await storage.snippets.incrementCopyCount({ storeId, id });
+    res.json({ ok: true });
+};
+
 export const deleteSnippet = async (
     req: express.Request,
     res: express.Response,

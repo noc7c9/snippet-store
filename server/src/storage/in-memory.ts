@@ -98,6 +98,7 @@ export default ({
                     title: data.title,
                     content: data.content,
                     tags: data.tags,
+                    copyCount: 0,
                 };
                 snippets[id] = snippet;
                 return snippet;
@@ -117,6 +118,21 @@ export default ({
                     title: data.title,
                     content: data.content,
                     tags: data.tags,
+                };
+            },
+            incrementCopyCount: async ({ storeId, id }) => {
+                log('snippets.incrementCopyCount:', { storeId, id });
+                if (!(storeId in storage.stores)) {
+                    throw new Error(`Unknown Store ID: ${storeId}`);
+                }
+                const snippets = storage.snippets[storeId];
+
+                if (!(id in snippets)) {
+                    throw new Error(`Unknown ID: ${id}`);
+                }
+                snippets[id] = {
+                    ...snippets[id],
+                    copyCount: snippets[id].copyCount + 1,
                 };
             },
             delete: async ({ storeId, id }) => {

@@ -27,6 +27,10 @@ export type StorageAPI = {
             args: { storeId: string; id: string },
             data: types.SnippetPayload,
         ) => Promise<void>;
+        incrementCopyCount: (args: {
+            storeId: string;
+            id: string;
+        }) => Promise<void>;
         delete: (args: { storeId: string; id: string }) => Promise<void>;
     };
 };

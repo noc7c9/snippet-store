@@ -54,6 +54,10 @@ app.put(
     '/api/stores/:storeId/snippets/:id',
     errorWrapper(controllers.updateSnippet),
 );
+app.patch(
+    '/api/stores/:storeId/snippets/:id/increment-copy-count',
+    errorWrapper(controllers.incrementSnippetCopyCount),
+);
 
 app.delete(
     '/api/stores/:storeId/snippets/:id',

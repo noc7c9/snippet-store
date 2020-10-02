@@ -10,5 +10,6 @@ export type Snippet = {
     title: string;
     content: string;
     tags: string[];
+    copyCount: number;
 };
 export type SnippetPayload = Pick<Snippet, 'title' | 'content' | 'tags'>;

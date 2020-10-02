@@ -123,6 +123,7 @@ export default ({
                     title: notNull(item.title.S),
                     content: notNull(item.content.S),
                     tags: notNull(item.tags.L).map((t) => notNull(t.S)),
+                    copyCount: parseInt(notNull(item.tags.N)),
                 }));
             },
 
@@ -138,6 +139,7 @@ export default ({
                         title: { S: data.title },
                         content: { S: data.content },
                         tags: { L: data.tags.map((tag) => ({ S: tag })) },
+                        copyCount: { N: '0' },
                     },
                 });
 
@@ -160,6 +162,19 @@ export default ({
                     },
                     UpdateExpression:
                         'SET title = :title, content = :content, tags = :tags',
+                });
+            },
+
+            incrementCopyCount: async ({ storeId, id }) => {
+                log('snippets.incrementCopyCount:', { storeId, id });
+
+                await client.updateItem({
+                    TableName,
+                    Key: {
+                        pk: { S: `${storeId}/SNIPPETS` },
+                        sk: { S: id },
+                    },
+                    UpdateExpression: 'ADD copyCount = copyCount + 1',
                 });
             },
 
