@@ -135,34 +135,40 @@ export default ({
     };
 
     if (mockDataPreset != null) {
-        log('Loading mock data');
-        const mockDataConfig = mockDataPresets[mockDataPreset];
-        if (mockDataConfig == null) {
-            throw new Error(`Unrecognized mock data preset: ${mockDataConfig}`);
-        }
-        const mockData = mockDataGenerator(mockDataConfig);
-        mockData.forEach((mockStore) => {
-            api.stores
-                .create({
-                    title: mockStore.title,
-                    description: mockStore.description,
-                })
-                .then(({ id: storeId }: { id: string }) => {
-                    mockStore.snippets.forEach((mockSnippet) => {
-                        api.snippets.create(
-                            { storeId },
-                            {
-                                title: mockSnippet.title,
-                                content: mockSnippet.content,
-                                tags: mockSnippet.tags,
-                            },
-                        );
-                    });
-                });
-        });
+        loadMockData(api, mockDataPreset);
     }
 
     return api;
+};
+
+const loadMockData = async (
+    api: StorageAPI,
+    mockDataPreset: keyof typeof mockDataPresets,
+) => {
+    log('Loading mock data');
+    const mockDataConfig = mockDataPresets[mockDataPreset];
+    if (mockDataConfig == null) {
+        throw new Error(`Unrecognized mock data preset: ${mockDataConfig}`);
+    }
+    const mockData = mockDataGenerator(mockDataConfig);
+
+    await Promise.all(
+        mockData.map(async (mockStore) => {
+            const { id: storeId } = await api.stores.create(mockStore);
+            await Promise.all(
+                mockStore.snippets.map((mockSnippet) =>
+                    api.snippets.create({ storeId }, mockSnippet),
+                ),
+            );
+        }),
+    );
+
+    console.log('='.repeat(process.stdout.columns));
+    console.log('Stores:');
+    mockData.forEach((mockStore) => {
+        console.log('-', sluggify(mockStore.title));
+    });
+    console.log('='.repeat(process.stdout.columns));
 };
 
 const mockDataPresets: Record<
