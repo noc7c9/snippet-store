@@ -111,6 +111,21 @@ export default {
             });
         },
 
+        incrementCopyCount: ({
+            storeId,
+            id,
+        }: {
+            storeId: string;
+            id: string;
+        }): Res<{ ok: true }> => {
+            const path = `/stores/${storeId}/snippets/${id}/increment-copy-count`;
+            log('PATCH', path);
+            return wrappedFetch(url(path), {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+            });
+        },
+
         remove: ({
             storeId,
             id,

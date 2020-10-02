@@ -113,6 +113,9 @@ export default (root: HTMLElement, { id: storeId }: { id: string }) => {
             } catch (err) {
                 elem.classList.add('copy-fail');
             }
+
+            // We don't care if request succeeds or not
+            api.snippets.incrementCopyCount({ id, storeId }).catch(() => {});
         });
 
         $.on(snippets, 'mouseover', async (e) => {
@@ -221,6 +224,7 @@ function setupCreateNewSnippetModal({
             title: elems.title.value.trim(),
             content: elems.content.value.trim(),
             tags: tagsInput.items,
+            copyCount: 0,
         };
 
         // If snippet doesn't have a title set, create one from the content
@@ -312,6 +316,7 @@ function setupEditSnippetModal({
             title: elems.title.value.trim(),
             content: elems.content.value.trim(),
             tags: tagsInput.items,
+            copyCount: -1, // will be ignored by the update
         };
 
         // If snippet doesn't have a title set, create one from the content
