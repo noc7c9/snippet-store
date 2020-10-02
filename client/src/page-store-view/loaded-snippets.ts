@@ -5,17 +5,20 @@ const log = logger('PAGE::Store-View::Loaded-Snippets');
 
 type Result = { snippet: types.Snippet; score: number; hidden: boolean };
 type FuseResult = Fuse.FuseResult<types.Snippet>;
+type SortBy = 'title' | 'copyCount';
 
 export type LoadedSnippets = {
     map: Record<string, Result>;
     fuse: Fuse<types.Snippet>;
     activeQuery: string | null;
+    activeSortBy: SortBy;
     cachedArray: Result[] | null;
 
     init: (snippets?: types.Snippet[]) => void;
     upsert: (snippet: types.Snippet) => void;
     get: (id: string) => types.Snippet | null;
     search: (query: string) => void;
+    sortBy: (newSort?: SortBy) => SortBy;
     asArray: () => Result[];
 };
 
@@ -33,17 +36,26 @@ const FUSE_OPTIONS = {
 };
 
 export default () => {
-    const instance = ({
+    const instance: LoadedSnippets = {
         map: {},
         fuse: new Fuse([], FUSE_OPTIONS),
         activeQuery: null,
+        activeSortBy: 'copyCount',
         cachedArray: null,
-    } as unknown) as LoadedSnippets;
+
+        init: null as any,
+        upsert: null as any,
+        get: null as any,
+        search: null as any,
+        sortBy: null as any,
+        asArray: null as any,
+    };
     return Object.assign(instance, {
         init: init(instance),
         upsert: upsert(instance),
         get: get(instance),
         search: search(instance),
+        sortBy: sortBy(instance),
         asArray: asArray(instance),
     });
 };
@@ -149,11 +161,41 @@ const tagSearch = (
     );
 };
 
+const sortBy = (instance: LoadedSnippets) => (newSortBy?: SortBy): SortBy => {
+    if (newSortBy != null) {
+        instance.cachedArray = null;
+        instance.activeSortBy = newSortBy;
+    }
+    return instance.activeSortBy;
+};
+
 const asArray = (instance: LoadedSnippets) => (): Result[] => {
     log('asArray');
     if (instance.cachedArray == null) {
         instance.cachedArray = Object.values(instance.map);
-        instance.cachedArray.sort((a, b) => a.score - b.score);
+        if (instance.activeQuery != null) {
+            instance.cachedArray.sort(sortByScore);
+        } else if (instance.activeSortBy === 'title') {
+            instance.cachedArray.sort(sortByTitle);
+        } else {
+            instance.cachedArray.sort(sortByCopyCount);
+        }
     }
     return instance.cachedArray;
+};
+
+const sortByScore = (a: Result, b: Result) => {
+    if (a.score === b.score) return sortByTitle(a, b);
+    return a.score - b.score;
+};
+
+const sortByTitle = (a: Result, b: Result) => {
+    if (a.snippet.title < b.snippet.title) return -1;
+    if (a.snippet.title > b.snippet.title) return 1;
+    return 0;
+};
+
+const sortByCopyCount = (a: Result, b: Result) => {
+    if (a.snippet.copyCount === b.snippet.copyCount) return sortByTitle(a, b);
+    return b.snippet.copyCount - a.snippet.copyCount;
 };

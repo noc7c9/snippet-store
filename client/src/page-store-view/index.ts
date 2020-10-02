@@ -168,6 +168,44 @@ export default (root: HTMLElement, { id: storeId }: { id: string }) => {
         };
     }
 
+    // events on sort buttons
+    {
+        const sortAlphaButton = $.one<HTMLButtonElement>('#sort-alpha');
+        const sortPopButton = $.one<HTMLButtonElement>('#sort-pop');
+
+        const fixActiveButton = () => {
+            if (loadedSnippets.sortBy() === 'title') {
+                sortPopButton.classList.remove('is-active', 'is-primary');
+                sortAlphaButton.classList.add('is-active', 'is-primary');
+            } else {
+                sortAlphaButton.classList.remove('is-active', 'is-primary');
+                sortPopButton.classList.add('is-active', 'is-primary');
+            }
+        };
+
+        fixActiveButton();
+
+        $.on(sortAlphaButton, 'click', (e) => {
+            if (loadedSnippets.sortBy() === 'title') return;
+
+            log('event click: sort by title');
+
+            loadedSnippets.sortBy('title');
+            fixActiveButton();
+            refreshSnippets();
+        });
+
+        $.on(sortPopButton, 'click', (e) => {
+            if (loadedSnippets.sortBy() === 'copyCount') return;
+
+            log('event click: sort by copy count');
+
+            loadedSnippets.sortBy('copyCount');
+            fixActiveButton();
+            refreshSnippets();
+        });
+    }
+
     setupCreateNewSnippetModal({
         root,
         storeId,

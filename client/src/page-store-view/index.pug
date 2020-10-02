@@ -13,8 +13,14 @@
 
             hr
 
-        .container
+        .container#form-box
             input.input#search-input(type='search', placeholder='Search')
+
+            .field.has-addons#sort-buttons
+                p.control
+                    button.button#sort-alpha Alphabetic
+                p.control
+                    button.button#sort-pop Popularity
 
         .container
             #page-error.notification.is-danger.is-hidden TOBEOVERRIDDEN
