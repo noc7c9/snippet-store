@@ -6,25 +6,6 @@ import mockDataGenerator from '../mock-data-generator';
 
 const log = logger('STORAGE::In-Memory');
 
-const dataToStore = (
-    id: string,
-    data: { title: string; description: string },
-) => ({
-    id,
-    title: data.title,
-    description: data.description,
-});
-
-const dataToSnippet = (
-    id: string,
-    data: { title: string; content: string; tags: string[] },
-) => ({
-    id,
-    title: data.title,
-    content: data.content,
-    tags: data.tags,
-});
-
 export default ({
     mock: mockDataPreset,
 }: { mock?: keyof typeof mockDataPresets } = {}): StorageAPI => {
@@ -57,7 +38,11 @@ export default ({
                     throw new Error(`Store with ID ${id} already exists`);
                 }
 
-                const store = dataToStore(id, data);
+                const store = {
+                    id,
+                    title: data.title,
+                    description: data.description,
+                };
                 storage.stores[id] = store;
                 storage.snippets[id] = {};
                 return store;
@@ -74,7 +59,11 @@ export default ({
                 if (!(id in storage.stores)) {
                     throw new Error(`Unknown ID: ${id}`);
                 }
-                storage.stores[id] = dataToStore(id, data);
+                storage.stores[id] = {
+                    id,
+                    title: data.title,
+                    description: data.description,
+                };
             },
         },
 
@@ -104,7 +93,12 @@ export default ({
                 const snippets = storage.snippets[storeId];
 
                 const id = generateId();
-                const snippet = dataToSnippet(id, data);
+                const snippet = {
+                    id,
+                    title: data.title,
+                    content: data.content,
+                    tags: data.tags,
+                };
                 snippets[id] = snippet;
                 return snippet;
             },
@@ -118,7 +112,12 @@ export default ({
                 if (!(id in snippets)) {
                     throw new Error(`Unknown ID: ${id}`);
                 }
-                snippets[id] = dataToSnippet(id, data);
+                snippets[id] = {
+                    ...snippets[id],
+                    title: data.title,
+                    content: data.content,
+                    tags: data.tags,
+                };
             },
             delete: async ({ storeId, id }) => {
                 log('snippets.delete:', { storeId, id });
