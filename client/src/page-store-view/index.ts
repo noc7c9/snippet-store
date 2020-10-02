@@ -44,9 +44,7 @@ export default (root: HTMLElement, { id: storeId }: { id: string }) => {
         });
     };
 
-    const fetchStoreData = api.store.fetch({ storeId }).then((v) => new Promise(resolve => {
-        setTimeout(() => resolve(v), 2000);
-    }));
+    const fetchStoreData = api.store.fetch({ storeId });
     const fetchSnippets = api.snippets.list({ storeId, first: 250 });
 
     // Main spinner
