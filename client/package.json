@@ -10,7 +10,11 @@
     },
     "scripts": {
         "build": "webpack --mode production",
-        "start": "webpack-dev-server --mode development"
+        "start": "webpack-dev-server --mode development",
+        "lint": "yarn lint:eslint; yarn lint:typescript; yarn lint:prettier",
+        "lint:eslint": "eslint --ext .ts src/",
+        "lint:typescript": "tsc --noEmit",
+        "lint:prettier": "prettier --check src/"
     },
     "dependencies": {
         "@creativebulma/bulma-tagsinput": "^1.0.2",
@@ -20,12 +24,19 @@
     },
     "devDependencies": {
         "@sucrase/webpack-loader": "^2.0.0",
+        "@typescript-eslint/eslint-plugin": "^4.3.0",
+        "@typescript-eslint/parser": "^4.3.0",
         "browser-sync": "^2.26.12",
         "clean-webpack-plugin": "^3.0.0",
         "css-loader": "^4.2.1",
         "dotenv-webpack": "^2.0.0",
+        "eslint": "^7.10.0",
+        "eslint-config-prettier": "^6.12.0",
+        "eslint-plugin-eslint-comments": "^3.2.0",
+        "eslint-plugin-import": "^2.22.1",
         "html-webpack-plugin": "^4.3.0",
         "mini-css-extract-plugin": "^0.10.0",
+        "prettier": "^2.1.2",
         "pug": "^3.0.0",
         "pug-loader": "^2.4.0",
         "sass": "^1.26.10",
@@ -35,5 +46,10 @@
         "webpack": "^4.44.1",
         "webpack-cli": "^3.3.12",
         "webpack-dev-server": "^3.11.0"
+    },
+    "prettier": {
+        "singleQuote": true,
+        "tabWidth": 4,
+        "trailingComma": "all"
     }
 }
