@@ -127,7 +127,7 @@ export default ({
                     title: notNull(item.title.S),
                     content: notNull(item.content.S),
                     tags: (item.tags.L ?? []).map((t) => notNull(t.S)),
-                    copyCount: parseInt(item.tags.N ?? '0'),
+                    copyCount: parseInt(item.copyCount.N ?? '0'),
                 }));
             },
 
