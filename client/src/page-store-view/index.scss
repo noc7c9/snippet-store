@@ -47,10 +47,6 @@ $anim-time: 0.25s;
                 fill: $primary;
                 stroke: $primary;
             }
-            &.is-active:hover svg {
-                fill: $primary;
-                stroke: $primary-light;
-            }
         }
 
         .edit-button {
