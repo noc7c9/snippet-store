@@ -178,7 +178,8 @@ export default ({
                         pk: { S: `${storeId}/SNIPPETS` },
                         sk: { S: id },
                     },
-                    UpdateExpression: 'SET copyCount = copyCount + 1',
+                    ExpressionAttributeValues: { ':one': { N: '1' } },
+                    UpdateExpression: 'ADD copyCount :one',
                 });
             },
 
