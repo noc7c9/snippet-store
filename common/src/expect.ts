@@ -1,11 +1,11 @@
-import assert from 'assert';
-
 export const notNull = <T>(value: T | null | undefined): T => {
-    assert(value != null, `Value is null or undefined`);
+    if (value == null) {
+        throw new Error('Value is null or undefined');
+    }
     return value;
 };
 
-export const isObj = (value: unknown): value is Object =>
+export const isObj = (value: unknown): value is Record<string, unknown> =>
     Object.prototype.toString.call(value) === '[object Object]';
 
 export const isArr = (value: unknown): value is unknown[] =>
