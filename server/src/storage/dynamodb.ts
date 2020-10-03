@@ -1,4 +1,4 @@
-import { types, expect, logger, sluggify } from '@snippet-store/common';
+import { expect, logger, sluggify } from '@snippet-store/common';
 import { DynamoDB } from '@aws-sdk/client-dynamodb';
 
 import { StorageAPI } from './types';
@@ -60,8 +60,12 @@ export default ({
                         ConditionExpression: 'attribute_not_exists(sk)',
                     })
                     .then(() => true)
-                    .catch((e) => {
-                        if (e.__type === 'ConditionalCheckFailedException') {
+                    .catch((e: unknown) => {
+                        if (
+                            expect.isObj(e) &&
+                            expect.hasProp(e, '__type') &&
+                            e.__type === 'ConditionalCheckFailedException'
+                        ) {
                             return false;
                         }
                         throw e;
@@ -96,7 +100,7 @@ export default ({
                 };
             },
 
-            update: async ({ id }, data) => {
+            update: ({ id }) => {
                 log('stores.fetch:', { id });
                 throw new Error('UNIMPLEMENTED');
             },

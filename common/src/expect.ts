@@ -8,6 +8,15 @@ export const notNull = <T>(value: T | null | undefined): T => {
 export const isObj = (value: unknown): value is Record<string, unknown> =>
     Object.prototype.toString.call(value) === '[object Object]';
 
+export const hasProp = <
+    Obj extends Record<string, unknown>,
+    P extends PropertyKey
+>(
+    obj: Obj,
+    prop: P,
+): obj is Obj & Record<P, unknown> =>
+    Object.prototype.hasOwnProperty.call(obj, prop);
+
 export const isArr = (value: unknown): value is unknown[] =>
     Array.isArray(value);
 

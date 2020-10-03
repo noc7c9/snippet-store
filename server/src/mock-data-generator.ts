@@ -1,5 +1,4 @@
 import { loremIpsum } from 'lorem-ipsum';
-import uuid from 'uuid';
 
 type Range = [number] | [number, number];
 
@@ -55,6 +54,8 @@ const randomStore = ({
     };
 };
 
+type MockData = ReturnType<typeof randomStore>[];
+
 export default ({
     numStores,
     storeConfig,
@@ -63,7 +64,7 @@ export default ({
     numStores: Range;
     storeConfig: Omit<RandomStore, 'snippetConfig'>;
     snippetConfig: Omit<RandomSnippet, 'tagPool'>;
-}) =>
+}): MockData =>
     Array.from(Array(randomInt(numStores)), () =>
         randomStore({ ...storeConfig, snippetConfig }),
     );

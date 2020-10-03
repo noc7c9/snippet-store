@@ -16,6 +16,7 @@ export default ({
 
     const api: StorageAPI = {
         stores: {
+            /* eslint-disable @typescript-eslint/require-await */
             list: async ({ first = 50, after = null } = {}) => {
                 log('stores.list:', { first, after });
                 const stores = Object.values(storage.stores);
@@ -147,11 +148,14 @@ export default ({
                 }
                 delete snippets[id];
             },
+            /* eslint-enable */
         },
     };
 
     if (mockDataPreset != null) {
-        loadMockData(api, mockDataPreset);
+        loadMockData(api, mockDataPreset).catch(() => {
+            // ignore
+        });
     }
 
     return api;
@@ -163,9 +167,6 @@ const loadMockData = async (
 ) => {
     log('Loading mock data');
     const mockDataConfig = mockDataPresets[mockDataPreset];
-    if (mockDataConfig == null) {
-        throw new Error(`Unrecognized mock data preset: ${mockDataConfig}`);
-    }
     const mockData = mockDataGenerator(mockDataConfig);
 
     await Promise.all(

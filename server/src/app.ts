@@ -1,5 +1,4 @@
 import { logger } from '@snippet-store/common';
-import assert from 'assert';
 import express from 'express';
 import bodyParser from 'body-parser';
 import cors from 'cors';
@@ -24,14 +23,18 @@ if (config.NODE_ENV === 'development') {
 }
 
 const errorWrapper = (
-    wrapper: (req: express.Request, res: express.Response) => void,
+    wrapper: (req: express.Request, res: express.Response) => Promise<void>,
 ) => async (req: express.Request, res: express.Response) => {
     try {
         await wrapper(req, res);
     } catch (error) {
         log.error(error);
         res.status(400);
-        res.json({ error: error.message });
+        if (error instanceof Error) {
+            res.json({ error: error.message });
+        } else {
+            res.json({ error: String(error) });
+        }
     }
 };
 

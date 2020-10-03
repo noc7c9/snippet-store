@@ -5,7 +5,7 @@ const base62 = baseX(
     '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ',
 );
 
-export default () => {
+export default (): string => {
     const buffer = Buffer.alloc(16);
     uuid.v4({}, buffer);
     const encoded = base62.encode(buffer);

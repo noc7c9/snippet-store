@@ -4,10 +4,9 @@ import storage from './storage';
 import { assertIsStore, assertIsSnippet } from './utils';
 
 export const listStores = async (
-    req: express.Request,
+    { query: { first, after } }: express.Request,
     res: express.Response,
-) => {
-    const { first, after } = req.query;
+): Promise<void> => {
     console.log('Listing stores:', { first, after });
 
     const stores = await storage.stores.list({
@@ -18,23 +17,21 @@ export const listStores = async (
 };
 
 export const createStore = async (
-    req: express.Request,
+    { body }: express.Request,
     res: express.Response,
-) => {
-    const store = req.body;
-    console.log('Creating store:', store);
+): Promise<void> => {
+    console.log('Creating store:', body);
 
-    assertIsStore(store);
+    const store = assertIsStore(body);
     const { id } = await storage.stores.create(store);
     res.status(201);
     res.json({ id });
 };
 
 export const fetchStore = async (
-    req: express.Request,
+    { params: { storeId } }: express.Request,
     res: express.Response,
-) => {
-    const { storeId } = req.params;
+): Promise<void> => {
     console.log('Getting store:', storeId);
 
     const store = await storage.stores.fetch({ id: storeId });
@@ -42,24 +39,20 @@ export const fetchStore = async (
 };
 
 export const updateStore = async (
-    req: express.Request,
+    { body, params: { storeId } }: express.Request,
     res: express.Response,
-) => {
-    const { storeId } = req.params;
-    const store = req.body;
-    console.log('Updating store', storeId, store);
+): Promise<void> => {
+    console.log('Updating store', storeId, body);
 
-    assertIsStore(store);
+    const store = assertIsStore(body);
     await storage.stores.update({ id: storeId }, store);
     res.json({ ok: true });
 };
 
 export const listSnippets = async (
-    req: express.Request,
+    { params: { storeId }, query: { first, after } }: express.Request,
     res: express.Response,
-) => {
-    const { storeId } = req.params;
-    const { first, after } = req.query;
+): Promise<void> => {
     console.log('Listing snippets:', { storeId, first, after });
 
     const snippets = await storage.snippets.list({
@@ -71,37 +64,32 @@ export const listSnippets = async (
 };
 
 export const createSnippet = async (
-    req: express.Request,
+    { body, params: { storeId } }: express.Request,
     res: express.Response,
-) => {
-    const { storeId } = req.params;
-    const snippet = req.body;
-    console.log('Creating snippet:', snippet);
+): Promise<void> => {
+    console.log('Creating snippet:', body);
 
-    assertIsSnippet(snippet);
+    const snippet = assertIsSnippet(body);
     const { id } = await storage.snippets.create({ storeId }, snippet);
     res.status(201);
     res.json({ id });
 };
 
 export const updateSnippet = async (
-    req: express.Request,
+    { body, params: { storeId, id } }: express.Request,
     res: express.Response,
-) => {
-    const { storeId, id } = req.params;
-    const snippet = req.body;
-    console.log('Updating snippet', storeId, id, snippet);
+): Promise<void> => {
+    console.log('Updating snippet', storeId, id, body);
 
-    assertIsSnippet(snippet);
+    const snippet = assertIsSnippet(body);
     await storage.snippets.update({ storeId, id }, snippet);
     res.json({ ok: true });
 };
 
 export const incrementSnippetCopyCount = async (
-    req: express.Request,
+    { params: { storeId, id } }: express.Request,
     res: express.Response,
-) => {
-    const { storeId, id } = req.params;
+): Promise<void> => {
     console.log('Incrementing snippet copyCount', storeId, id);
 
     await storage.snippets.incrementCopyCount({ storeId, id });
@@ -109,10 +97,9 @@ export const incrementSnippetCopyCount = async (
 };
 
 export const deleteSnippet = async (
-    req: express.Request,
+    { params: { storeId, id } }: express.Request,
     res: express.Response,
-) => {
-    const { storeId, id } = req.params;
+): Promise<void> => {
     console.log('Deleting snippet', storeId, id);
 
     await storage.snippets.delete({ storeId, id });
