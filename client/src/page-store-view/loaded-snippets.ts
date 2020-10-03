@@ -15,10 +15,13 @@ export type LoadedSnippets = {
     cachedArray: Result[] | null;
 
     init: (snippets?: types.Snippet[]) => void;
+
     upsert: (snippet: types.Snippet) => void;
     get: (id: string) => types.Snippet | null;
+
     search: (query: string) => void;
     sortBy: (newSort?: SortBy) => SortBy;
+
     asArray: () => Result[];
 };
 
@@ -44,18 +47,24 @@ export default () => {
         cachedArray: null,
 
         init: null as any,
+
         upsert: null as any,
         get: null as any,
+
         search: null as any,
         sortBy: null as any,
+
         asArray: null as any,
     };
     return Object.assign(instance, {
         init: init(instance),
+
         upsert: upsert(instance),
         get: get(instance),
+
         search: search(instance),
         sortBy: sortBy(instance),
+
         asArray: asArray(instance),
     });
 };
@@ -162,6 +171,7 @@ const tagSearch = (
 };
 
 const sortBy = (instance: LoadedSnippets) => (newSortBy?: SortBy): SortBy => {
+    log('sortBy:', newSortBy);
     if (newSortBy != null) {
         instance.cachedArray = null;
         instance.activeSortBy = newSortBy;
