@@ -1,11 +1,10 @@
-import { types, logger } from '@snippet-store/common';
+import { expect, types, logger } from '@snippet-store/common';
 import Fuse from 'fuse.js';
 import * as localStorage from '../utils/local-storage';
 
 const log = logger('PAGE::Store-View::Loaded-Snippets');
 
 type Result = { snippet: types.Snippet; score: number; hidden: boolean };
-type FuseResult = Fuse.FuseResult<types.Snippet>;
 type SortBy = 'title' | 'copyCount';
 
 export type LoadedSnippets = {
@@ -39,7 +38,7 @@ const FUSE_OPTIONS = {
     useExtendedSearch: true,
 };
 
-export default (storeId: string) => {
+export default (storeId: string): LoadedSnippets => {
     const instance: LoadedSnippets = {
         storeId,
         map: {},
@@ -47,6 +46,7 @@ export default (storeId: string) => {
         activeQuery: null,
         activeSortBy: 'copyCount',
 
+        /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment */
         init: null as any,
 
         upsert: null as any,
@@ -56,6 +56,7 @@ export default (storeId: string) => {
         sortBy: null as any,
 
         asArray: null as any,
+        /* eslint-enable */
     };
     return Object.assign(instance, {
         init: init(instance),
@@ -73,7 +74,7 @@ export default (storeId: string) => {
 const init = (instance: LoadedSnippets) => (snippets: types.Snippet[] = []) => {
     log('initializing');
 
-    snippets.forEach((snippet, idx) => {
+    snippets.forEach((snippet) => {
         instance.map[snippet.id] = { snippet, hidden: false, score: Infinity };
     });
 
@@ -153,7 +154,7 @@ const search = (instance: LoadedSnippets) => (rawQuery: string): void => {
 
     matches.forEach(({ item: { id }, score }) => {
         instance.map[id].hidden = false;
-        instance.map[id].score = score!;
+        instance.map[id].score = expect.notNull(score);
     });
 };
 

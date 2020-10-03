@@ -5,7 +5,7 @@ declare module '*.pug' {
 
 declare module '@creativebulma/bulma-tagsinput' {
     class BulmaTagsInput {
-        constructor(elem: HTMLInputElement, opts?: Record<string, any>);
+        constructor(elem: HTMLInputElement, opts?: Record<string, unknown>);
 
         input: HTMLInputElement;
         selected: string | null;

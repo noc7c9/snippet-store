@@ -18,7 +18,7 @@ router.init([
 
     {
         pattern: /^\/stores\/(?<id>[0-9a-zA-Z-]+)\/snippets$/,
-        render: ({ params }) => renderStoreView(root, params as any),
+        render: ({ params }) => renderStoreView(root, params as { id: string }),
     },
 
     {

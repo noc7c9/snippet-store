@@ -65,7 +65,9 @@ $anim-time: 0.25s;
             position: relative;
             margin-bottom: 0.5rem;
 
-            p { white-space: pre-line; }
+            p {
+                white-space: pre-line;
+            }
         }
 
         .copy-button {
@@ -93,20 +95,26 @@ $anim-time: 0.25s;
                 opacity: 0.75;
             }
 
-            &:after { content: "Click to Copy"; }
+            &:after {
+                content: 'Click to Copy';
+            }
 
             &.copy-success {
                 color: $success-invert;
                 background-color: $success;
 
-                &:after { content: "Copied!"; }
+                &:after {
+                    content: 'Copied!';
+                }
             }
 
             &.copy-fail {
                 color: $danger-invert;
                 background-color: $danger;
 
-                &:after { content: "Failed!"; }
+                &:after {
+                    content: 'Failed!';
+                }
             }
         }
 
@@ -124,7 +132,8 @@ $anim-time: 0.25s;
     }
 }
 
-#create-new-snippet-modal, #edit-snippet-modal {
+#create-new-snippet-modal,
+#edit-snippet-modal {
     .tags-input input:first-child {
         padding-left: $control-padding-horizontal;
     }

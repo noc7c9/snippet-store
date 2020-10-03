@@ -5,11 +5,11 @@ const log = logger('LOCAL-STORAGE');
 const RECENT_KEY = 'RECENT_STORES';
 const RECENT_MAX = 50;
 
-const get = (key: string, defaultValue: any = null): any => {
+const get = <T>(key: string, defaultValue: T): T => {
     log('get', key);
     try {
         const data = localStorage.getItem(key);
-        return data == null ? defaultValue : JSON.parse(data);
+        return data == null ? defaultValue : (JSON.parse(data) as T);
     } catch (e) {
         return defaultValue;
     }
@@ -20,12 +20,14 @@ const set = (key: string, value: unknown) => {
     localStorage.setItem(key, JSON.stringify(value));
 };
 
-export const getAllRecentStores = (): types.Store[] => {
+type RecentStores = types.Store[];
+
+export const getAllRecentStores = (): RecentStores => {
     return get(RECENT_KEY, []);
 };
 
-export const addRecentStore = (store: types.Store) => {
-    const data = get(RECENT_KEY, []);
+export const addRecentStore = (store: types.Store): void => {
+    const data = get<RecentStores>(RECENT_KEY, []);
 
     // Remove if already in the existing data
     for (let i = 0; i < data.length; i++) {
@@ -46,14 +48,18 @@ export const addRecentStore = (store: types.Store) => {
 
 const toPinKey = (storeId: string): string => `PINNED/${storeId}`;
 
-export const getPinData = (storeId: string) => {
-    const data = get(toPinKey(storeId), {});
+type PinData = Record<string, boolean>;
+
+export const getPinData = (
+    storeId: string,
+): ((snippetId: string) => boolean) => {
+    const data = get<PinData>(toPinKey(storeId), {});
     return (snippetId: string): boolean => data[snippetId] ?? false;
 };
 
 export const togglePinned = (storeId: string, snippetId: string): boolean => {
     const key = toPinKey(storeId);
-    const data = get(key, {});
+    const data = get<PinData>(key, {});
     if (data[snippetId]) {
         delete data[snippetId];
     } else {

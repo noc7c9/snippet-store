@@ -1,8 +1,8 @@
-import { types, logger, expect } from '@snippet-store/common';
+import { logger, expect } from '@snippet-store/common';
 import BulmaTagsInput from '@creativebulma/bulma-tagsinput';
 
+import * as async from '../utils/async';
 import * as $ from '../utils/$';
-import * as router from '../utils/router';
 import api from '../utils/api';
 import createModal from '../utils/create-modal';
 import * as localStorage from '../utils/local-storage';
@@ -17,7 +17,7 @@ import makeLoadedSnippets, { LoadedSnippets } from './loaded-snippets';
 
 const log = logger('PAGE::Store-View');
 
-export default (root: HTMLElement, { id: storeId }: { id: string }) => {
+export default (root: HTMLElement, { id: storeId }: { id: string }): void => {
     root.innerHTML = template();
 
     const snippets = $.one('#snippets');
@@ -49,16 +49,16 @@ export default (root: HTMLElement, { id: storeId }: { id: string }) => {
     const fetchSnippets = api.snippets.list({ storeId, first: 250 });
 
     // Main spinner
-    (async () => {
+    async.iife(async () => {
         await fetchStoreData;
         await fetchSnippets;
 
         $.one('#main-spinner').classList.add('is-hidden');
         $.one('#main-content').classList.remove('is-hidden');
-    })();
+    });
 
     // Loading store data
-    (async () => {
+    async.iife(async () => {
         const res = await fetchStoreData;
 
         if ('error' in res) {
@@ -72,10 +72,10 @@ export default (root: HTMLElement, { id: storeId }: { id: string }) => {
 
         $.one('#title').textContent = res.store.title;
         $.one('#description').textContent = res.store.description;
-    })();
+    });
 
     // Loading snippets
-    (async () => {
+    async.iife(async () => {
         const res = await fetchSnippets;
 
         snippets.classList.remove('is-spinner');
@@ -89,7 +89,7 @@ export default (root: HTMLElement, { id: storeId }: { id: string }) => {
 
         loadedSnippets.init(res.snippets);
         renderSnippets();
-    })();
+    });
 
     // propagated events on snippets
     {
@@ -98,14 +98,14 @@ export default (root: HTMLElement, { id: storeId }: { id: string }) => {
             const elem = e.target as Element;
 
             if (elem.matches('.copy-button')) {
-                clickOnCopyButton(elem).catch(() => {});
+                async.ignore(clickOnCopyButton(elem));
                 e.preventDefault();
                 return;
             }
 
             const pinButton = elem.closest('.pin-button');
             if (pinButton || elem.matches('.pin-button')) {
-                clickOnPinButton(pinButton ?? elem).catch(() => {});
+                clickOnPinButton(pinButton ?? elem);
                 e.preventDefault();
                 return;
             }
@@ -124,10 +124,10 @@ export default (root: HTMLElement, { id: storeId }: { id: string }) => {
             }
 
             // We don't care if request succeeds or not
-            api.snippets.incrementCopyCount({ id, storeId }).catch(() => {});
+            async.ignore(api.snippets.incrementCopyCount({ id, storeId }));
         };
 
-        const clickOnPinButton = async (elem: Element) => {
+        const clickOnPinButton = (elem: Element) => {
             const { id } = expect.notNull(elem.closest('.snippet'));
 
             const isPinned = localStorage.togglePinned(storeId, id);
@@ -137,7 +137,7 @@ export default (root: HTMLElement, { id: storeId }: { id: string }) => {
             log('event click:', isPinned ? 'pin' : 'unpin', id);
         };
 
-        $.on(snippets, 'mouseover', async (e) => {
+        $.on(snippets, 'mouseover', (e) => {
             if (e.target == null) return;
             const elem = e.target as Element;
 
@@ -157,12 +157,12 @@ export default (root: HTMLElement, { id: storeId }: { id: string }) => {
         const input = $.one<HTMLInputElement>('#search-input');
 
         let timeout: ReturnType<typeof setTimeout>;
-        $.on(input, 'input', (e) => {
+        $.on(input, 'input', () => {
             clearTimeout(timeout);
             timeout = setTimeout(doSearch, DEBOUNCE);
         });
 
-        $.on(snippets, 'click', async (e) => {
+        $.on(snippets, 'click', (e) => {
             if (e.target == null) return;
             const elem = e.target as Element;
 
@@ -206,7 +206,7 @@ export default (root: HTMLElement, { id: storeId }: { id: string }) => {
 
         fixActiveButton();
 
-        $.on(sortAlphaButton, 'click', (e) => {
+        $.on(sortAlphaButton, 'click', () => {
             if (loadedSnippets.sortBy() === 'title') return;
 
             log('event click: sort by title');
@@ -216,7 +216,7 @@ export default (root: HTMLElement, { id: storeId }: { id: string }) => {
             refreshSnippets();
         });
 
-        $.on(sortPopButton, 'click', (e) => {
+        $.on(sortPopButton, 'click', () => {
             if (loadedSnippets.sortBy() === 'copyCount') return;
 
             log('event click: sort by copy count');
@@ -276,39 +276,43 @@ function setupCreateNewSnippetModal({
         elems.content.focus();
     });
 
-    $.on(elems.submit, 'click', async () => {
-        const snippet = {
-            title: elems.title.value.trim(),
-            content: elems.content.value.trim(),
-            tags: tagsInput.items,
-            copyCount: 0,
-        };
+    $.on(
+        elems.submit,
+        'click',
+        async.cb(async () => {
+            const snippet = {
+                title: elems.title.value.trim(),
+                content: elems.content.value.trim(),
+                tags: tagsInput.items,
+                copyCount: 0,
+            };
 
-        // If snippet doesn't have a title set, create one from the content
-        if (snippet.title === '') {
-            snippet.title = titleFromContent(snippet.content);
-        }
+            // If snippet doesn't have a title set, create one from the content
+            if (snippet.title === '') {
+                snippet.title = titleFromContent(snippet.content);
+            }
 
-        log('event click: create', snippet);
+            log('event click: create', snippet);
 
-        elems.submit.classList.add('is-loading');
-        const res = await api.snippets.create({ storeId }, snippet);
-        elems.submit.classList.remove('is-loading');
+            elems.submit.classList.add('is-loading');
+            const res = await api.snippets.create({ storeId }, snippet);
+            elems.submit.classList.remove('is-loading');
 
-        if ('error' in res) {
-            log('failed to create store:', res.error);
-            elems.error.classList.remove('is-hidden');
-            elems.error.textContent = `Error: ${res.error}`;
-            return;
-        }
+            if ('error' in res) {
+                log('failed to create store:', res.error);
+                elems.error.classList.remove('is-hidden');
+                elems.error.textContent = `Error: ${res.error}`;
+                return;
+            }
 
-        log('created new snippet:', res.id);
+            log('created new snippet:', res.id);
 
-        loadedSnippets.upsert({ id: res.id, ...snippet });
-        renderSnippets();
+            loadedSnippets.upsert({ id: res.id, ...snippet });
+            renderSnippets();
 
-        modal.hide();
-    });
+            modal.hide();
+        }),
+    );
 }
 
 function setupEditSnippetModal({
@@ -338,7 +342,7 @@ function setupEditSnippetModal({
 
     let editingId: string;
 
-    $.on(snippets, 'click', async (e) => {
+    $.on(snippets, 'click', (e) => {
         if (e.target == null) return;
         const elem = e.target as Element;
 
@@ -347,7 +351,7 @@ function setupEditSnippetModal({
         }
         e.preventDefault();
 
-        const { id } = elem.parentNode!.parentNode! as any;
+        const { id } = expect.notNull(elem.parentElement?.parentElement);
         editingId = id;
 
         log('event click: edit', id);
@@ -366,41 +370,45 @@ function setupEditSnippetModal({
         elems.content.focus();
     });
 
-    $.on(elems.submit, 'click', async () => {
-        const id = editingId;
-        const snippet = {
-            id,
-            title: elems.title.value.trim(),
-            content: elems.content.value.trim(),
-            tags: tagsInput.items,
-            copyCount: -1, // will be ignored by the update
-        };
+    $.on(
+        elems.submit,
+        'click',
+        async.cb(async () => {
+            const id = editingId;
+            const snippet = {
+                id,
+                title: elems.title.value.trim(),
+                content: elems.content.value.trim(),
+                tags: tagsInput.items,
+                copyCount: -1, // will be ignored by the update
+            };
 
-        // If snippet doesn't have a title set, create one from the content
-        if (snippet.title === '') {
-            snippet.title = titleFromContent(snippet.content);
-        }
+            // If snippet doesn't have a title set, create one from the content
+            if (snippet.title === '') {
+                snippet.title = titleFromContent(snippet.content);
+            }
 
-        log('event click: save', snippet);
+            log('event click: save', snippet);
 
-        elems.submit.classList.add('is-loading');
-        const res = await api.snippets.update({ id, storeId }, snippet);
-        elems.submit.classList.remove('is-loading');
+            elems.submit.classList.add('is-loading');
+            const res = await api.snippets.update({ id, storeId }, snippet);
+            elems.submit.classList.remove('is-loading');
 
-        if ('error' in res) {
-            log('failed to create store:', res.error);
-            elems.error.classList.remove('is-hidden');
-            elems.error.textContent = `Error: ${res.error}`;
-            return;
-        }
+            if ('error' in res) {
+                log('failed to create store:', res.error);
+                elems.error.classList.remove('is-hidden');
+                elems.error.textContent = `Error: ${res.error}`;
+                return;
+            }
 
-        log('updating snippet:', id);
+            log('updating snippet:', id);
 
-        loadedSnippets.upsert(snippet);
-        renderSnippets();
+            loadedSnippets.upsert(snippet);
+            renderSnippets();
 
-        modal.hide();
-    });
+            modal.hide();
+        }),
+    );
 }
 
 const FIRST_WORDS_COUNT = 7;

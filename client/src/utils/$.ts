@@ -18,7 +18,7 @@ export function one<E extends HTMLElement>(
     const [ctx, selector] =
         maybeSelector == null
             ? [document, elementOrSelector as string]
-            : [elementOrSelector as HTMLElement, maybeSelector as string];
+            : [elementOrSelector as HTMLElement, maybeSelector];
     const elem = ctx.querySelector(selector);
     if (elem == null) {
         throw new Error(`Failed to select element with "${selector}"`);
@@ -38,14 +38,22 @@ export function all<E extends HTMLElement>(
     const [ctx, selector] =
         maybeSelector == null
             ? [document, elementOrSelector as string]
-            : [elementOrSelector as HTMLElement, maybeSelector as string];
+            : [elementOrSelector as HTMLElement, maybeSelector];
     return Array.from(ctx.querySelectorAll(selector));
 }
 
-export const on = (target: Element, event: string, handler: EventListener) => {
+export const on = (
+    target: Element,
+    event: string,
+    handler: EventListener,
+): void => {
     target.addEventListener(event, handler);
 };
-export const off = (target: Element, event: string, handler: EventListener) => {
+export const off = (
+    target: Element,
+    event: string,
+    handler: EventListener,
+): void => {
     target.removeEventListener(event, handler);
 };
 

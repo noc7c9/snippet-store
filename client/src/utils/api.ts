@@ -1,4 +1,4 @@
-import { types, logger } from '@snippet-store/common';
+import { expect, types, logger } from '@snippet-store/common';
 
 import * as config from '../config';
 
@@ -7,16 +7,20 @@ const log = logger('API');
 const url = (path: string, query = {}) => {
     // JSON roundtrip removes undefined values
     const queryString = new URLSearchParams(JSON.parse(JSON.stringify(query)));
-    return `${config.API_URL}/api${path}?${queryString}`;
+    return `${config.API_URL}/api${path}?${queryString.toString()}`;
 };
 
 const wrappedFetch = async (url: string, opts: Parameters<typeof fetch>[1]) => {
     const res = await fetch(url, opts);
     const { status } = res;
-    const data = await res.json();
+    const data = (await res.json()) as unknown;
 
     // Just return if the code is okay
     if (status >= 200 && status < 300) {
+        return data;
+    }
+
+    if (!expect.isObj(data)) {
         return data;
     }
 
@@ -41,6 +45,8 @@ export default {
             after?: string;
         }): Res<{ stores: types.Store[] }> => {
             log('GET /stores');
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore
             return wrappedFetch(url('/stores', { first, after }), {
                 method: 'GET',
             });
@@ -48,6 +54,8 @@ export default {
 
         create: (data: types.StorePayload): Res<{ id: string }> => {
             log('POST /stores');
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore
             return wrappedFetch(url('/stores'), {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -62,6 +70,8 @@ export default {
         }): Res<{ store: types.Store }> => {
             const path = `/stores/${storeId}`;
             log('GET', path);
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore
             return wrappedFetch(url(path), {
                 method: 'GET',
             });
@@ -80,6 +90,8 @@ export default {
         }): Res<{ snippets: types.Snippet[] }> => {
             const path = `/stores/${storeId}/snippets`;
             log('GET', path);
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore
             return wrappedFetch(url(path, { first, after }), {
                 method: 'GET',
             });
@@ -91,6 +103,8 @@ export default {
         ): Res<{ id: string }> => {
             const path = `/stores/${storeId}/snippets`;
             log('POST', path);
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore
             return wrappedFetch(url(path), {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -104,6 +118,8 @@ export default {
         ): Res<{ ok: true }> => {
             const path = `/stores/${storeId}/snippets/${id}`;
             log('PUT', path);
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore
             return wrappedFetch(url(path), {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
@@ -120,6 +136,8 @@ export default {
         }): Res<{ ok: true }> => {
             const path = `/stores/${storeId}/snippets/${id}/increment-copy-count`;
             log('PATCH', path);
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore
             return wrappedFetch(url(path), {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
@@ -135,6 +153,8 @@ export default {
         }): Res<{ ok: true }> => {
             const path = `/stores/${storeId}/snippets/${id}`;
             log('DELETE', path);
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore
             return wrappedFetch(url(path), {
                 method: 'DELETE',
             });

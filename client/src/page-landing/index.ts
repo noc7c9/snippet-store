@@ -1,5 +1,6 @@
 import { logger, sluggify } from '@snippet-store/common';
 
+import * as async from '../utils/async';
 import * as $ from '../utils/$';
 import * as router from '../utils/router';
 import api from '../utils/api';
@@ -13,7 +14,7 @@ import templateModalCreateNewStore from './modal-create-new-store.pug';
 
 const log = logger('PAGE::Landing');
 
-export default (root: HTMLElement) => {
+export default (root: HTMLElement): void => {
     root.innerHTML = template();
 
     {
@@ -91,7 +92,7 @@ export default (root: HTMLElement) => {
             elems.title.focus();
         });
 
-        $.on(modal, 'input', (e) => {
+        $.on(modal, 'input', () => {
             const isFormValid = elems.title.value.trim().length > 0;
             elems.submit.disabled = !isFormValid;
         });
@@ -100,26 +101,30 @@ export default (root: HTMLElement) => {
             elems.id.value = sluggify(elems.title.value);
         });
 
-        $.on(elems.submit, 'click', async () => {
-            const store = {
-                title: elems.title.value.trim(),
-                description: elems.desc.value.trim(),
-            };
-            log('event click: create', store);
+        $.on(
+            elems.submit,
+            'click',
+            async.cb(async () => {
+                const store = {
+                    title: elems.title.value.trim(),
+                    description: elems.desc.value.trim(),
+                };
+                log('event click: create', store);
 
-            elems.submit.classList.add('is-loading');
-            const res = await api.store.create(store);
-            elems.submit.classList.remove('is-loading');
+                elems.submit.classList.add('is-loading');
+                const res = await api.store.create(store);
+                elems.submit.classList.remove('is-loading');
 
-            if ('error' in res) {
-                log('failed to create store:', res.error);
-                elems.error.classList.remove('is-hidden');
-                elems.error.textContent = `Error: ${res.error}`;
-                return;
-            }
+                if ('error' in res) {
+                    log('failed to create store:', res.error);
+                    elems.error.classList.remove('is-hidden');
+                    elems.error.textContent = `Error: ${res.error}`;
+                    return;
+                }
 
-            log('created new store:', res.id);
-            router.goto(`/stores/${res.id}/snippets`);
-        });
+                log('created new store:', res.id);
+                router.goto(`/stores/${res.id}/snippets`);
+            }),
+        );
     }
 };

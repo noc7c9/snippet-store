@@ -12,7 +12,7 @@ type Route = {
     render: Handler;
 };
 
-export const init = (routes: Route[]) => {
+export const init = (routes: Route[]): void => {
     // Ensure we're on the root page
     if (location.pathname !== '/') {
         log.warn('Redirecting to root page');
@@ -49,7 +49,7 @@ const route = (routes: Route[]) => {
     }
 };
 
-export const goto = (route: string) => {
+export const goto = (route: string): void => {
     log('goto:', route);
     location.hash = route;
 };

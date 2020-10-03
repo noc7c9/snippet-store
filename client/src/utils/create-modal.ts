@@ -6,7 +6,7 @@ type Modal = HTMLElement & {
 };
 
 export default ({ template }: { template: () => string }): Modal => {
-    const modal = $.frag(template()) as Modal;
+    const modal: Modal = $.frag(template());
 
     modal.show = () => modal.classList.add('is-active');
     modal.hide = () => modal.classList.remove('is-active');
