@@ -27,8 +27,7 @@ else if (config.STORAGE === 'dynamodb') {
 
 // Unknown
 else {
-    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-    throw new Error(`Unknown env.STORAGE value: ${config.STORAGE}`);
+    throw new Error(`Unknown env.STORAGE value: ${String(config.STORAGE)}`);
 }
 
 export default storage;
