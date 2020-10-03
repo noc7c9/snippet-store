@@ -13,6 +13,9 @@ log('Loaded Config:', JSON.stringify(config));
 
 const app = express();
 
+app.set('etag', false);
+app.set('x-powered-by', false);
+
 app.use(morgan(config.NODE_ENV === 'development' ? 'dev' : 'combined'));
 app.use(bodyParser.json());
 
