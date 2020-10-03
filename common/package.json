@@ -8,5 +8,21 @@
     "engines": {
         "node": "12.18.x"
     },
-    "main": "src/index.ts"
+    "main": "src/index.ts",
+    "scripts": {
+        "lint": "yarn lint:eslint; yarn lint:typescript; yarn lint:prettier",
+        "lint:eslint": "eslint --ext .ts src/",
+        "lint:typescript": "tsc --noEmit",
+        "lint:prettier": "prettier --check src/"
+    },
+    "devDependencies": {
+        "@typescript-eslint/eslint-plugin": "^4.3.0",
+        "@typescript-eslint/parser": "^4.3.0",
+        "eslint": "^7.10.0",
+        "eslint-config-prettier": "^6.12.0",
+        "eslint-plugin-eslint-comments": "^3.2.0",
+        "eslint-plugin-import": "^2.22.1",
+        "prettier": "^2.1.2",
+        "typescript": "^4.0.2"
+    }
 }
