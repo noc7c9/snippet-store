@@ -43,3 +43,22 @@ export const addRecentStore = (store: types.Store) => {
 
     set(RECENT_KEY, data);
 };
+
+const toPinKey = (storeId: string): string => `PINNED/${storeId}`;
+
+export const getPinData = (storeId: string) => {
+    const data = get(toPinKey(storeId), {});
+    return (snippetId: string): boolean => data[snippetId] ?? false;
+};
+
+export const togglePinned = (storeId: string, snippetId: string): boolean => {
+    const key = toPinKey(storeId);
+    const data = get(key, {});
+    if (data[snippetId]) {
+        delete data[snippetId];
+    } else {
+        data[snippetId] = true;
+    }
+    set(key, data);
+    return data[snippetId] ?? false;
+};

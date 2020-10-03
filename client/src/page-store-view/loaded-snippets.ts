@@ -1,5 +1,6 @@
 import { types, logger } from '@snippet-store/common';
 import Fuse from 'fuse.js';
+import * as localStorage from '../utils/local-storage';
 
 const log = logger('PAGE::Store-View::Loaded-Snippets');
 
@@ -8,11 +9,11 @@ type FuseResult = Fuse.FuseResult<types.Snippet>;
 type SortBy = 'title' | 'copyCount';
 
 export type LoadedSnippets = {
+    storeId: string;
     map: Record<string, Result>;
     fuse: Fuse<types.Snippet>;
     activeQuery: string | null;
     activeSortBy: SortBy;
-    cachedArray: Result[] | null;
 
     init: (snippets?: types.Snippet[]) => void;
 
@@ -38,13 +39,13 @@ const FUSE_OPTIONS = {
     useExtendedSearch: true,
 };
 
-export default () => {
+export default (storeId: string) => {
     const instance: LoadedSnippets = {
+        storeId,
         map: {},
         fuse: new Fuse([], FUSE_OPTIONS),
         activeQuery: null,
         activeSortBy: 'copyCount',
-        cachedArray: null,
 
         init: null as any,
 
@@ -71,7 +72,6 @@ export default () => {
 
 const init = (instance: LoadedSnippets) => (snippets: types.Snippet[] = []) => {
     log('initializing');
-    instance.cachedArray = null;
 
     snippets.forEach((snippet, idx) => {
         instance.map[snippet.id] = { snippet, hidden: false, score: Infinity };
@@ -82,7 +82,6 @@ const init = (instance: LoadedSnippets) => (snippets: types.Snippet[] = []) => {
 
 const upsert = (instance: LoadedSnippets) => (snippet: types.Snippet) => {
     log('upsert:', snippet.id);
-    instance.cachedArray = null;
 
     if (snippet.id in instance.map) {
         instance.map[snippet.id].snippet = snippet;
@@ -108,8 +107,6 @@ const get = (instance: LoadedSnippets) => (
 };
 
 const search = (instance: LoadedSnippets) => (rawQuery: string): void => {
-    instance.cachedArray = null;
-
     const query = rawQuery.trim();
 
     if (query === '') {
@@ -173,39 +170,50 @@ const tagSearch = (
 const sortBy = (instance: LoadedSnippets) => (newSortBy?: SortBy): SortBy => {
     log('sortBy:', newSortBy);
     if (newSortBy != null) {
-        instance.cachedArray = null;
         instance.activeSortBy = newSortBy;
     }
     return instance.activeSortBy;
 };
 
+type SortCmp = (a: Result, b: Result) => number;
+
 const asArray = (instance: LoadedSnippets) => (): Result[] => {
     log('asArray');
-    if (instance.cachedArray == null) {
-        instance.cachedArray = Object.values(instance.map);
-        if (instance.activeQuery != null) {
-            instance.cachedArray.sort(sortByScore);
-        } else if (instance.activeSortBy === 'title') {
-            instance.cachedArray.sort(sortByTitle);
-        } else {
-            instance.cachedArray.sort(sortByCopyCount);
-        }
+
+    const array = Object.values(instance.map);
+    let sortCmp: SortCmp = sortByCopyCount;
+    if (instance.activeQuery != null) {
+        sortCmp = sortByScore;
+    } else if (instance.activeSortBy === 'title') {
+        sortCmp = sortByTitle;
     }
-    return instance.cachedArray;
+    array.sort(sortByPinning(instance.storeId, sortCmp));
+    return array;
 };
 
-const sortByScore = (a: Result, b: Result) => {
+const sortByPinning = (storeId: string, cmp: SortCmp): SortCmp => {
+    const isPinned = localStorage.getPinData(storeId);
+    return (a, b) => {
+        const aPinned = isPinned(a.snippet.id);
+        const bPinned = isPinned(b.snippet.id);
+        if (aPinned && !bPinned) return -1;
+        if (!aPinned && bPinned) return 1;
+        return cmp(a, b);
+    };
+};
+
+const sortByScore: SortCmp = (a, b) => {
     if (a.score === b.score) return sortByTitle(a, b);
     return a.score - b.score;
 };
 
-const sortByTitle = (a: Result, b: Result) => {
+const sortByTitle: SortCmp = (a, b) => {
     if (a.snippet.title < b.snippet.title) return -1;
     if (a.snippet.title > b.snippet.title) return 1;
     return 0;
 };
 
-const sortByCopyCount = (a: Result, b: Result) => {
+const sortByCopyCount: SortCmp = (a, b) => {
     if (a.snippet.copyCount === b.snippet.copyCount) return sortByTitle(a, b);
     return b.snippet.copyCount - a.snippet.copyCount;
 };

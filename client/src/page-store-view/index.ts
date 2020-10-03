@@ -21,11 +21,12 @@ export default (root: HTMLElement, { id: storeId }: { id: string }) => {
     root.innerHTML = template();
 
     const snippets = $.one('#snippets');
-    const loadedSnippets = makeLoadedSnippets();
+    const loadedSnippets = makeLoadedSnippets(storeId);
 
     const renderSnippets = () => {
         snippets.innerHTML = templateSnippetList({
             results: loadedSnippets.asArray(),
+            isPinned: localStorage.getPinData(storeId),
         });
         refreshSnippets();
     };
@@ -90,17 +91,27 @@ export default (root: HTMLElement, { id: storeId }: { id: string }) => {
         renderSnippets();
     })();
 
-    // events on .copy-button
+    // propagated events on snippets
     {
-        $.on(snippets, 'click', async (e) => {
+        $.on(snippets, 'click', (e) => {
             if (e.target == null) return;
             const elem = e.target as Element;
 
-            if (!elem.matches('.copy-button')) {
+            if (elem.matches('.copy-button')) {
+                clickOnCopyButton(elem).catch(() => {});
+                e.preventDefault();
                 return;
             }
-            e.preventDefault();
 
+            const pinButton = elem.closest('.pin-button');
+            if (pinButton || elem.matches('.pin-button')) {
+                clickOnPinButton(pinButton ?? elem).catch(() => {});
+                e.preventDefault();
+                return;
+            }
+        });
+
+        const clickOnCopyButton = async (elem: Element) => {
             const { id } = expect.notNull(elem.closest('.snippet'));
             log('event click: copy', id);
 
@@ -114,7 +125,17 @@ export default (root: HTMLElement, { id: storeId }: { id: string }) => {
 
             // We don't care if request succeeds or not
             api.snippets.incrementCopyCount({ id, storeId }).catch(() => {});
-        });
+        };
+
+        const clickOnPinButton = async (elem: Element) => {
+            const { id } = expect.notNull(elem.closest('.snippet'));
+
+            const isPinned = localStorage.togglePinned(storeId, id);
+            elem.classList.toggle('is-active', isPinned);
+            refreshSnippets();
+
+            log('event click:', isPinned ? 'pin' : 'unpin', id);
+        };
 
         $.on(snippets, 'mouseover', async (e) => {
             if (e.target == null) return;

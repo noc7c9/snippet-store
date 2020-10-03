@@ -29,6 +29,30 @@ $anim-time: 0.25s;
             margin-bottom: 0.5rem;
         }
 
+        .pin-button {
+            padding: 2px;
+            padding-right: 4px;
+
+            svg {
+                fill: none;
+                stroke: $grey-lighter;
+                width: 20px;
+                height: 20px;
+            }
+            &:hover svg {
+                stroke: $primary;
+            }
+
+            &.is-active svg {
+                fill: $primary;
+                stroke: $primary;
+            }
+            &.is-active:hover svg {
+                fill: $primary;
+                stroke: $primary-light;
+            }
+        }
+
         .edit-button {
             opacity: 0;
             transition: opacity $anim-time;
