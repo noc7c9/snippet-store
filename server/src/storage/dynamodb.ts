@@ -38,7 +38,7 @@ export default ({
                 return (Items || []).map((item) => ({
                     id: notNull(item.sk.S),
                     title: notNull(item.title.S),
-                    description: item.description.S ?? '',
+                    description: item.description?.S ?? '',
                 }));
             },
 
@@ -96,7 +96,7 @@ export default ({
                 return {
                     id: notNull(Item.sk.S),
                     title: notNull(Item.title.S),
-                    description: Item.description.S ?? '',
+                    description: Item.description?.S ?? '',
                 };
             },
 
@@ -126,8 +126,8 @@ export default ({
                     id: notNull(item.sk.S),
                     title: notNull(item.title.S),
                     content: notNull(item.content.S),
-                    tags: (item.tags.L ?? []).map((t) => notNull(t.S)),
-                    copyCount: parseInt(item.copyCount.N ?? '0'),
+                    tags: (item.tags?.L ?? []).map((t) => notNull(t.S)),
+                    copyCount: parseInt(item.copyCount?.N ?? '0'),
                 }));
             },
 
