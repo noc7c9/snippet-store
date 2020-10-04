@@ -15,3 +15,15 @@
         border-width: 0.25rem;
     }
 }
+
+#root {
+    min-height: calc(100vh - 3rem);
+}
+
+.footer {
+    padding: 1rem 0;
+    line-height: 1rem;
+    height: 3rem;
+    bottom: 0;
+    position: static;
+}
